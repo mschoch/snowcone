@@ -1,0 +1,16 @@
+#*
+*.sublime-*
+*~
+.#*
+.project
+.settings
+**/.idea/
+**/*.iml
+.DS_Store
+/cmd/sgc/sgc
+vendor/**
+!vendor/manifest
+/y.output
+*.test
+tags
+profile.out
