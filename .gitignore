@@ -7,7 +7,7 @@
 **/.idea/
 **/*.iml
 .DS_Store
-/cmd/sgc/sgc
+/cmd/scc/scc
 vendor/**
 !vendor/manifest
 /y.output

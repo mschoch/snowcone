@@ -24,7 +24,7 @@ tREPLACE tDELETE tHOP tNEXT tASSIGNR tLBRACKET tRBRACKET
 tMOVER tSETMARK tTOMARK tATMARK tTOLIMIT tATLIMIT tSETLIMIT
 tFOR tBACKWARDS tREVERSE tSUBSTRING tAMONG tSET tUNSET
 tNON tTRUE tFALSE tBACKWARDMODE tQUESTION
-tSTRINGESCAPES tSTRINGDEF
+tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
 
 %type <s>                tLITERAL
 %type <n>                tNUMBER
@@ -65,7 +65,7 @@ gdef
         logDebugGrammar("P - gdef")
 }
 |
-tBACKWARDMODE tLPAREN p tRPAREN
+tBACKWARDMODE tLPAREN program tRPAREN
 {
         logDebugGrammar("P - backwardmode")
 }
@@ -73,6 +73,27 @@ tBACKWARDMODE tLPAREN p tRPAREN
 tSTRINGESCAPES
 {
         logDebugGrammar("P - stringescapes")
+}
+|
+tSTRINGDEF stringdefliteraltype tLITERAL
+{
+        logDebugGrammar("P - stringedef")
+};
+
+stringdefliteraltype:
+/*empty*/
+{
+
+}
+|
+tHEX
+{
+        logDebugGrammar("STRINGDEFLITERALTYPE - hex")
+}
+|
+tDECIMAL
+{
+        logDebugGrammar("STRINGDEFLITERALTYPE - decimal")
 };
 
 declaration:
@@ -229,11 +250,6 @@ tATLEAST ae command
         logDebugGrammar("COMMAND - loop ae")
 }
 |
-nameorliteral
-{
-        logDebugGrammar("COMMAND - s")
-}
-|
 tINSERT nameorliteral
 {
         logDebugGrammar("COMMAND - insert")
@@ -386,7 +402,12 @@ tLITERAL tNAME
         logDebugGrammar("AMONGITEM - literal name")
 }
 |
-tLPAREN command tRPAREN
+tLITERAL tLPAREN tRPAREN
+{
+        logDebugGrammar("AMONGITEM - paren empty")
+}
+|
+tLITERAL tLPAREN commands tRPAREN
 {
         logDebugGrammar("AMONGITEM - paren command")
 };
@@ -397,12 +418,12 @@ command_factor
         logDebugGrammar("COMMANDTERM - command factor")
 }
 |
-command_factor tOR command_term
+command_factor tOR command
 {
         logDebugGrammar("COMMANDTERM - or")
 }
 |
-command_factor tAND command_term
+command_factor tAND command
 {
         logDebugGrammar("COMMANDTERM - and")
 };
@@ -426,6 +447,11 @@ tLPAREN tRPAREN
 tLPAREN commands tRPAREN
 {
         logDebugGrammar("COMMANDFACTOR - paren commands")
+}
+|
+nameorliteral
+{
+        logDebugGrammar("COMMANDFACTOR - s")
 }
 ;
 

@@ -9,12 +9,6 @@
 //  express or implied. See the License for the specific language
 //  governing permissions and limitations under the License.
 
-//go:generate nex snowball.nex
-//go:generate sed -i "" -e s/Lexer/lexer/g snowball.nn.go
-//go:generate sed -i "" -e s/Newlexer/newLexer/g snowball.nn.go
-//go:generate sed -i "" -e s/NewlexerWithInit/newLexerWithInit/g snowball.nn.go
-//go:generate sed -i "" -e s/Debuglexer/DebugLexer/g snowball.nn.go
-//go:generate go fmt snowball.nn.go
 //go:generate go tool yacc -o snowball.y.go snowball.y
 //go:generate sed -i "" -e 1d snowball.y.go
 
@@ -46,7 +40,7 @@ var Logger = log.New(ioutil.Discard, "bleve", log.LstdFlags)
 // Currently this only returns an error, in the future it will also
 // return an AST built during parsing.
 func Parse(program io.Reader) (err error) {
-	lex := newLexerWrapper(newLexer(program))
+	lex := newLexerWrapper(newSnowConeLex(program))
 	doParse(lex)
 
 	if len(lex.errs) > 0 {
