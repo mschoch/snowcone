@@ -34,14 +34,6 @@ func (kwl keywordList) StartWith(prefix string) keywordList {
 	return rv
 }
 
-func (kwl keywordList) HasExact(name string) bool {
-	pos := sort.SearchStrings(kwl, name)
-	if pos < len(kwl) && kwl[pos] == name {
-		return true
-	}
-	return false
-}
-
 // snowConeKeyWords must be kept in sorted order
 var snowConeKeyWords = keywordList{
 	"!=", "$", "(", ")", "*", "*=", "+", "+=", "-", "-=", "->", "/", "/=", "<",
