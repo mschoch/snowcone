@@ -339,6 +339,6 @@ func logDebugTokens(format string, v ...interface{}) {
 	}
 }
 
-func (l *snowConeLex) Error(string) {
-
+func (l *snowConeLex) Error(msg string) {
+	panic(msg)
 }
