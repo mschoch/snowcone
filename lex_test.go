@@ -642,6 +642,12 @@ func TestLexer(t *testing.T) {
 				{},
 			},
 		},
+		{
+			// unterminated literal at EOF produces no token
+			in:            "'alit",
+			outTokenTypes: nil,
+			outTokens:     nil,
+		},
 	}
 
 	for _, test := range tests {

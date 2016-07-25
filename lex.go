@@ -76,10 +76,7 @@ func startState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 	// a few cases are not checked below because they are not possible
 	// maybeComment=true by itself cannot happen because / and /= are keywords
 	// mabyeComment=true and maybeName=true cannot happen since / is not valid in name
-	if maybeComment && maybeName && maybeKeyword {
-		l.buf += string(next)
-		return maybeNameKeywordCommentState, true
-	} else if maybeName && maybeKeyword {
+	if maybeName && maybeKeyword {
 		l.buf += string(next)
 		return maybeNameKeywordState, true
 	} else if maybeComment && maybeKeyword {
@@ -129,19 +126,6 @@ func inNumberState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 	}
 	l.buf += string(next)
 	return inNumberState, true
-}
-
-func maybeNameKeywordCommentState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
-	if !eof && l.buf == "/" {
-		switch next {
-		case '/':
-			return inLineComment, true
-		case '*':
-			return inMultiLineComment, true
-		}
-	}
-
-	return maybeNameKeywordState, false
 }
 
 func maybeKeywordCommentState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
@@ -246,12 +230,8 @@ func maybeNameState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 		}
 	}
 
-	// cannot continue building name, try to close out
-	if strings.IndexFunc(l.buf, allLetterDigitUnderscore) < 0 {
-		return finishName(l)
-	}
-
-	return nil, false
+	// current buffer must be a valid name, finish it
+	return finishName(l)
 }
 
 var allLetterDigitUnderscore = func(next rune) bool {
@@ -271,14 +251,9 @@ func maybeKeywordState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 		}
 	}
 
-	// adding next character would mean no possible keywords
-	if l.possibleKeywords.HasExact(l.buf) {
-		return finishKeyword(l)
-	}
-
-	// current buffer isn't actuall keyword, and can't be a name
-	// or we would still be inside maybeKeywordName
-	return nil, false
+	// current buffer must be a keyword (since we're in this state)
+	// so close it out
+	return finishKeyword(l)
 }
 
 func inLineComment(l *snowConeLex, next rune, eof bool) (lexState, bool) {
