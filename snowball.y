@@ -34,6 +34,10 @@ tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
 %type <s>                tNAME
 %type <s>                tSTRINGESCAPES
 
+%left tNOT tTEST tTRY tDO tFAIL tGOTO tGOPAST tREPEAT tBACKWARDS tREVERSE tLOOP
+tATLEAST tNAME tFOR
+%left tOR tAND
+
 %%
 
 input:
@@ -196,9 +200,9 @@ command commands
 };
 
 command:
-command_term
+nameorliteral
 {
-        logDebugGrammar("COMMAND - command term")
+        logDebugGrammar("COMMANDFACTOR - s")
 }
 |
 icommand
@@ -209,6 +213,36 @@ icommand
 scommand
 {
         logDebugGrammar("COMMAND - scommand")
+}
+|
+tAMONG tLPAREN tRPAREN
+{
+        logDebugGrammar("COMMAND - among empty")
+}
+|
+tAMONG tLPAREN amonglist tRPAREN
+{
+        logDebugGrammar("COMMAND - among list")
+}
+|
+tTRUE
+{
+        logDebugGrammar("COMMANDFACTOR - true")
+}
+|
+tFALSE
+{
+        logDebugGrammar("COMMANDFACTOR - false")
+}
+|
+tLPAREN tRPAREN
+{
+        logDebugGrammar("COMMANDFACTOR - paren empty")
+}
+|
+tLPAREN commands tRPAREN
+{
+        logDebugGrammar("COMMANDFACTOR - paren commands")
 }
 |
 tNOT command
@@ -356,16 +390,6 @@ tSUBSTRING
         logDebugGrammar("COMMAND - substring")
 }
 |
-tAMONG tLPAREN tRPAREN
-{
-        logDebugGrammar("COMMAND - among empty")
-}
-|
-tAMONG tLPAREN amonglist tRPAREN
-{
-        logDebugGrammar("COMMAND - among list")
-}
-|
 tSET tNAME
 {
         logDebugGrammar("COMMAND - set")
@@ -389,6 +413,16 @@ tNON tMINUS tNAME
 tQUESTION
 {
         logDebugGrammar("COMMAND - question")
+}
+|
+command tOR command
+{
+        logDebugGrammar("COMMANDTERM - or")
+}
+|
+command tAND command
+{
+        logDebugGrammar("COMMANDTERM - and")
 }
 ;
 
@@ -422,49 +456,6 @@ tLITERAL tLPAREN commands tRPAREN
 {
         logDebugGrammar("AMONGITEM - paren command")
 };
-
-command_term:
-command_factor
-{
-        logDebugGrammar("COMMANDTERM - command factor")
-}
-|
-command_factor tOR command
-{
-        logDebugGrammar("COMMANDTERM - or")
-}
-|
-command_factor tAND command
-{
-        logDebugGrammar("COMMANDTERM - and")
-};
-
-command_factor:
-tTRUE
-{
-        logDebugGrammar("COMMANDFACTOR - true")
-}
-|
-tFALSE
-{
-        logDebugGrammar("COMMANDFACTOR - false")
-}
-|
-tLPAREN tRPAREN
-{
-        logDebugGrammar("COMMANDFACTOR - paren empty")
-}
-|
-tLPAREN commands tRPAREN
-{
-        logDebugGrammar("COMMANDFACTOR - paren commands")
-}
-|
-nameorliteral
-{
-        logDebugGrammar("COMMANDFACTOR - s")
-}
-;
 
 scommand:
 tDOLLAR tNAME command
