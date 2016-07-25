@@ -62,19 +62,19 @@ func doParse(lex *lexerWrapper) {
 }
 
 type lexerWrapper struct {
-	nex  yyLexer
+	lex  yyLexer
 	errs []string
 }
 
-func newLexerWrapper(nex yyLexer) *lexerWrapper {
+func newLexerWrapper(lex yyLexer) *lexerWrapper {
 	return &lexerWrapper{
-		nex:  nex,
+		lex:  lex,
 		errs: []string{},
 	}
 }
 
 func (l *lexerWrapper) Lex(lval *yySymType) int {
-	return l.nex.Lex(lval)
+	return l.lex.Lex(lval)
 }
 
 func (l *lexerWrapper) Error(s string) {

@@ -1,7 +1,10 @@
 %{
 package snowcone
 
-import "fmt"
+import (
+  "fmt"
+  "unicode/utf8"
+)
 
 func logDebugGrammar(format string, v ...interface{}) {
     if DebugParser {
@@ -29,6 +32,7 @@ tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
 %type <s>                tLITERAL
 %type <n>                tNUMBER
 %type <s>                tNAME
+%type <s>                tSTRINGESCAPES
 
 %%
 
@@ -72,7 +76,14 @@ tBACKWARDMODE tLPAREN program tRPAREN
 |
 tSTRINGESCAPES
 {
-        logDebugGrammar("P - stringescapes")
+        if utf8.RuneCountInString($1) == 2 {
+          logDebugGrammar("P - stringescapes")
+          first, len := utf8.DecodeRuneInString($1)
+          second, len := utf8.DecodeRuneInString($1[len:])
+          yylex.(*lexerWrapper).lex.(*snowConeLex).SetStringEscapes(first, second)
+        } else {
+          logDebugGrammar("P - stringescapes rune count NOT 2!!!")
+        }
 }
 |
 tSTRINGDEF stringdefliteraltype tLITERAL

@@ -36,6 +36,7 @@ type snowConeLex struct {
 	stringEscapeStart rune
 	stringEscapeEnd   rune
 	stringEscapesSeen int
+	insideEscapeSeq   bool
 }
 
 func (l *snowConeLex) reset() {
@@ -100,7 +101,7 @@ func inLiteralState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 		return nil, false
 	}
 	// FIXME handle string escapes
-	if next == '\'' {
+	if next == '\'' && !l.insideEscapeSeq {
 		l.nextTokenType = tLITERAL
 		l.nextToken = &yySymType{
 			s: l.buf[1:],
@@ -108,6 +109,10 @@ func inLiteralState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 		logDebugTokens("LITERAL - '%s'", l.nextToken.s)
 		l.reset()
 		return startState, true
+	} else if next == l.stringEscapeStart {
+		l.insideEscapeSeq = true
+	} else if next == l.stringEscapeEnd {
+		l.insideEscapeSeq = false
 	}
 	l.buf += string(next)
 	return inLiteralState, true
@@ -309,4 +314,10 @@ func logDebugTokens(format string, v ...interface{}) {
 
 func (l *snowConeLex) Error(msg string) {
 	panic(msg)
+}
+
+func (l *snowConeLex) SetStringEscapes(start, end rune) {
+	l.stringEscapeStart = start
+	l.stringEscapeEnd = end
+	logDebugTokens("updated string escapes to %s - %s", string(l.stringEscapeStart), string(l.stringEscapeEnd))
 }

@@ -84,6 +84,10 @@ func TestParser(t *testing.T) {
 		{
 			in: porterStemmerSrc,
 		},
+		{
+			in: `stringescapes {}
+			define v 'aeiou{a'}{e'}{i'}{o'}{u'}{u"}'`,
+		},
 	}
 
 	for _, test := range tests {
@@ -104,6 +108,10 @@ func TestParserFail(t *testing.T) {
 		{
 			// incomplete definition
 			in: `define`,
+		},
+		{
+			// did not call string escapes to define escape characters
+			in: `define v 'aeiou{a'}{e'}{i'}{o'}{u'}{u"}'`,
 		},
 	}
 
