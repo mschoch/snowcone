@@ -158,22 +158,22 @@ func maybeNameKeywordState(l *snowConeLex, next rune, eof bool) (lexState, bool)
 		} else if maybeName {
 			l.buf += string(next)
 			return maybeNameState, true
-		} else if maybeKeyword {
-			l.buf += string(next)
-			l.possibleKeywords = possibleKeywords
-			return maybeKeywordState, true
 		}
+		// checking maybeKeyword ONLY is not needed
+		// this would be the case where upon seeing a new letter
+		// something could have been a name or keyword, now can ONLY be
+		// a keyword - but, that cannot happen with the current keywords
+		// all keywords that start as a valid name, remain valid names
+		// for example, if there was a keyword 'magic/' that would
+		// have triggered this case because the / character makes it no
+		// longer possible to be a name, and ONLY a keyword
 	}
 
-	// adding this character ended possibilities
-	// either the current buffer is a keyword, or a valid name, or its an error
-	if l.possibleKeywords.HasExact(l.buf) {
-		return finishKeyword(l)
-	} else if strings.IndexFunc(l.buf, allLetterDigitUnderscore) < 0 {
-		return finishName(l)
-	}
-
-	return nil, false
+	// at this point it MUST be a keyword
+	// the only way it could have been a name is if we produced something
+	// longer than the keyword, but we know it still overlaps with a keyword
+	// so that is what we produce
+	return finishKeyword(l)
 }
 
 // we've already found the stringescapes token, looking for 2 characters to finish
@@ -232,13 +232,6 @@ func maybeNameState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 
 	// current buffer must be a valid name, finish it
 	return finishName(l)
-}
-
-var allLetterDigitUnderscore = func(next rune) bool {
-	if !unicode.IsLetter(next) && !unicode.IsNumber(next) && next != '_' {
-		return true
-	}
-	return false
 }
 
 func maybeKeywordState(l *snowConeLex, next rune, eof bool) (lexState, bool) {

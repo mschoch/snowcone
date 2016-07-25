@@ -625,6 +625,22 @@ func TestLexer(t *testing.T) {
 			},
 		},
 		{
+			// stringescapes with additional whitespace
+			in:            "stringescapes       {}",
+			outTokenTypes: []int{tSTRINGESCAPES},
+			outTokens: []yySymType{
+				{
+					s: "{}",
+				},
+			},
+		},
+		{
+			// improperly terminated stringescapes at EOF produces nothing
+			in:            "stringescapes      ",
+			outTokenTypes: nil,
+			outTokens:     nil,
+		},
+		{
 			in: `
 			/* a multi
 			line comment */
@@ -641,6 +657,12 @@ func TestLexer(t *testing.T) {
 				},
 				{},
 			},
+		},
+		{
+			// unterminated literal at EOF produces no token
+			in:            "'alit",
+			outTokenTypes: nil,
+			outTokens:     nil,
 		},
 		{
 			// unterminated literal at EOF produces no token
