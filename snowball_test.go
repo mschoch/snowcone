@@ -94,6 +94,27 @@ func TestParser(t *testing.T) {
 	}
 }
 
+func TestParserFail(t *testing.T) {
+	// DebugLexer = true
+	// DebugParser = true
+	// Logger = log.New(os.Stdout, "", log.LstdFlags)
+	tests := []struct {
+		in string
+	}{
+		{
+			// incomplete definition
+			in: `define`,
+		},
+	}
+
+	for _, test := range tests {
+		err := Parse(strings.NewReader(test.in))
+		if err == nil {
+			t.Errorf("expected error got nil for %s", test.in)
+		}
+	}
+}
+
 var porterStemmerSrc = `
 integers ( p1 p2 )
 booleans ( Y_found )
