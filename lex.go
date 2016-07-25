@@ -295,7 +295,7 @@ func inMultiLineComment(l *snowConeLex, next rune, eof bool) (lexState, bool) {
 		return startState, true
 	}
 	l.buf += string(next)
-	return inLineComment, true
+	return inMultiLineComment, true
 }
 
 func newSnowConeLex(in io.Reader) *snowConeLex {

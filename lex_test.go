@@ -624,6 +624,24 @@ func TestLexer(t *testing.T) {
 				},
 			},
 		},
+		{
+			in: `
+			/* a multi
+			line comment */
+			strings (bob wood)`,
+			outTokenTypes: []int{tSTRINGS, tLPAREN, tNAME, tNAME, tRPAREN},
+			outTokens: []yySymType{
+				{},
+				{},
+				{
+					s: "bob",
+				},
+				{
+					s: "wood",
+				},
+				{},
+			},
+		},
 	}
 
 	for _, test := range tests {
