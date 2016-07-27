@@ -15,7 +15,10 @@ func logDebugGrammar(format string, v ...interface{}) {
 
 %union {
 s string
-n int}
+n int
+strings []string
+declarations decls
+}
 
 %token tLITERAL tNUMBER tNAME tSTRINGS tINTEGERS tBOOLEANS tROUTINES
 tEXTERNALS tGROUPINGS tLPAREN tRPAREN tDEFINE tAS tPLUS tMINUS
@@ -33,6 +36,8 @@ tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
 %type <n>                tNUMBER
 %type <s>                tNAME
 %type <s>                tSTRINGESCAPES
+%type <strings>          names
+%type <declarations>     declaration
 
 %left tNOT tTEST tTRY tDO tFAIL tGOTO tGOPAST tREPEAT tBACKWARDS tREVERSE tLOOP
 tATLEAST tNAME tFOR
@@ -43,7 +48,7 @@ tATLEAST tNAME tFOR
 input:
 program
 {
-        logDebugGrammar("INPUT")
+        logDebugGrammar("INPUT - %v", yylex.(*lexerWrapper).p)
 };
 
 program:
@@ -61,6 +66,9 @@ p:
 declaration
 {
         logDebugGrammar("P - decl")
+        for _, decl := range $1 {
+          yylex.(*lexerWrapper).p.Declare(decl)
+        }
 }
 |
 rdef
@@ -114,32 +122,69 @@ tDECIMAL
 declaration:
 tSTRINGS tLPAREN names tRPAREN
 {
-        logDebugGrammar("DECLARATION - strings")
+        logDebugGrammar("DECLARATION - strings named: %v", $3)
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sstring,
+          })
+        }
 }
 |
 tINTEGERS tLPAREN names tRPAREN
 {
         logDebugGrammar("DECLARATION - integers")
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sinteger,
+          })
+        }
 }
 |
 tBOOLEANS tLPAREN names tRPAREN
 {
         logDebugGrammar("DECLARATION - booleans")
+        logDebugGrammar("DECLARATION - integers")
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sboolean,
+          })
+        }
 }
 |
 tROUTINES tLPAREN names tRPAREN
 {
         logDebugGrammar("DECLARATION - routines")
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sroutine,
+          })
+        }
 }
 |
 tEXTERNALS tLPAREN names tRPAREN
 {
         logDebugGrammar("DECLARATION - externals")
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sexternal,
+          })
+        }
 }
 |
 tGROUPINGS tLPAREN names tRPAREN
 {
         logDebugGrammar("DECLARATION - groupings")
+        for _, name := range $3 {
+          $$ = append($$, &decl{
+            name: name,
+            typ: sgrouping,
+          })
+        }
 }
 ;
 
@@ -617,9 +662,13 @@ names:
 tNAME
 {
         logDebugGrammar("NAMES - single")
+        $$ = []string{$1}
 }
 |
 tNAME names
 {
         logDebugGrammar("NAMEs - multi")
+        $$ = append($2, "")
+        copy($$[1:], $$[0:])
+        $$[0] = $1
 };

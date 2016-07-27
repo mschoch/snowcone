@@ -39,18 +39,18 @@ var Logger = log.New(ioutil.Discard, "bleve", log.LstdFlags)
 // and attemptes to parse it
 // Currently this only returns an error, in the future it will also
 // return an AST built during parsing.
-func Parse(program io.Reader) (err error) {
+func Parse(program io.Reader) (*prog, error) {
 	lex := newLexerWrapper(newSnowConeLex(program))
-	doParse(lex)
+	p := doParse(lex)
 
 	if len(lex.errs) > 0 {
-		return fmt.Errorf(strings.Join(lex.errs, "\n"))
+		return nil, fmt.Errorf(strings.Join(lex.errs, "\n"))
 	}
 
-	return nil
+	return p, nil
 }
 
-func doParse(lex *lexerWrapper) {
+func doParse(lex *lexerWrapper) *prog {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -59,17 +59,20 @@ func doParse(lex *lexerWrapper) {
 	}()
 
 	yyParse(lex)
+	return lex.p
 }
 
 type lexerWrapper struct {
 	lex  yyLexer
 	errs []string
+	p    *prog
 }
 
 func newLexerWrapper(lex yyLexer) *lexerWrapper {
 	return &lexerWrapper{
 		lex:  lex,
 		errs: []string{},
+		p:    &prog{},
 	}
 }
 

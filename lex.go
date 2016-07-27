@@ -174,11 +174,13 @@ func maybeNameKeywordState(l *snowConeLex, next rune, eof bool) (lexState, bool)
 		// longer possible to be a name, and ONLY a keyword
 	}
 
-	// at this point it MUST be a keyword
-	// the only way it could have been a name is if we produced something
-	// longer than the keyword, but we know it still overlaps with a keyword
-	// so that is what we produce
-	return finishKeyword(l)
+	// still might be a keyword, needs to be exact match with first possible
+	if l.possibleKeywords[0] == l.buf {
+		logDebugTokens("EOF first match")
+		return finishKeyword(l)
+	}
+	logDebugTokens("EOF first NOT match")
+	return finishName(l)
 }
 
 // we've already found the stringescapes token, looking for 2 characters to finish

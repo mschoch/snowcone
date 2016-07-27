@@ -91,7 +91,7 @@ func TestParser(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := Parse(strings.NewReader(test.in))
+		_, err := Parse(strings.NewReader(test.in))
 		if err != nil {
 			t.Errorf("parse error: %v", err)
 		}
@@ -116,7 +116,7 @@ func TestParserFail(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := Parse(strings.NewReader(test.in))
+		_, err := Parse(strings.NewReader(test.in))
 		if err == nil {
 			t.Errorf("expected error got nil for %s", test.in)
 		}

@@ -16,9 +16,11 @@ func logDebugGrammar(format string, v ...interface{}) {
 
 //line snowball.y:16
 type yySymType struct {
-	yys int
-	s   string
-	n   int
+	yys          int
+	s            string
+	n            int
+	strings      []string
+	declarations decls
 }
 
 const tLITERAL = 57346
@@ -225,7 +227,7 @@ var yyAct = [...]int{
 	108, 109, 40, 150, 142, 42, 155, 41, 141, 138,
 	137, 131, 130, 154, 32, 28, 148, 30, 121, 134,
 	135, 136, 147, 54, 53, 159, 93, 19, 6, 5,
-	4, 143, 144, 3, 1, 0, 0, 0, 0, 0,
+	3, 143, 144, 1, 4, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 151, 0, 0, 0, 0,
 	176, 0, 0, 179, 180, 0, 0, 0, 0, 0,
 	160, 181, 182, 0, 0, 185, 186, 187, 188, 189,
@@ -294,15 +296,15 @@ var yyPact = [...]int{
 }
 var yyPgo = [...]int{
 
-	0, 134, 22, 133, 130, 129, 128, 127, 32, 34,
+	0, 32, 134, 133, 22, 130, 129, 128, 127, 34,
 	8, 126, 10, 1, 124, 123, 2, 0, 122, 3,
 	118,
 }
 var yyR1 = [...]int{
 
-	0, 1, 2, 2, 3, 3, 3, 3, 3, 3,
-	7, 7, 7, 4, 4, 4, 4, 4, 4, 5,
-	10, 10, 11, 11, 12, 12, 6, 13, 13, 9,
+	0, 3, 4, 4, 5, 5, 5, 5, 5, 5,
+	8, 8, 8, 2, 2, 2, 2, 2, 2, 6,
+	10, 10, 11, 11, 12, 12, 7, 13, 13, 9,
 	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
 	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
 	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
@@ -311,7 +313,7 @@ var yyR1 = [...]int{
 	15, 14, 14, 14, 14, 14, 14, 14, 14, 14,
 	14, 14, 17, 17, 17, 17, 17, 17, 17, 17,
 	17, 17, 17, 17, 19, 19, 19, 20, 20, 20,
-	8, 8,
+	1, 1,
 }
 var yyR2 = [...]int{
 
@@ -330,11 +332,11 @@ var yyR2 = [...]int{
 }
 var yyChk = [...]int{
 
-	-1000, -1, -2, -3, -4, -5, -6, 79, 81, 82,
-	7, 8, 9, 10, 11, 12, 15, -2, 13, -7,
-	83, 84, 13, 13, 13, 13, 13, 13, 6, -2,
-	4, -8, 6, -8, -8, -8, -8, -8, 16, -12,
-	-10, 6, 4, 14, 14, -8, 14, 14, 14, 14,
+	-1000, -3, -4, -5, -2, -6, -7, 79, 81, 82,
+	7, 8, 9, 10, 11, 12, 15, -4, 13, -8,
+	83, 84, 13, 13, 13, 13, 13, 13, 6, -4,
+	4, -1, 6, -1, -1, -1, -1, -1, 16, -12,
+	-10, 6, 4, 14, 14, -1, 14, 14, 14, 14,
 	14, -9, -10, -14, -15, 73, 77, 78, 13, 43,
 	44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
 	54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
@@ -733,49 +735,52 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:45
+		//line snowball.y:50
 		{
-			logDebugGrammar("INPUT")
+			logDebugGrammar("INPUT - %v", yylex.(*lexerWrapper).p)
 		}
 	case 2:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:51
+		//line snowball.y:56
 		{
 			logDebugGrammar("PROGRAM - single")
 		}
 	case 3:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:56
+		//line snowball.y:61
 		{
 			logDebugGrammar("PROGRAM - multi")
 		}
 	case 4:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:62
+		//line snowball.y:67
 		{
 			logDebugGrammar("P - decl")
+			for _, decl := range yyDollar[1].declarations {
+				yylex.(*lexerWrapper).p.Declare(decl)
+			}
 		}
 	case 5:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:67
+		//line snowball.y:75
 		{
 			logDebugGrammar("P - rdef")
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:72
+		//line snowball.y:80
 		{
 			logDebugGrammar("P - gdef")
 		}
 	case 7:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:77
+		//line snowball.y:85
 		{
 			logDebugGrammar("P - backwardmode")
 		}
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:82
+		//line snowball.y:90
 		{
 			if utf8.RuneCountInString(yyDollar[1].s) == 2 {
 				logDebugGrammar("P - stringescapes")
@@ -788,621 +793,662 @@ yydefault:
 		}
 	case 9:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:94
+		//line snowball.y:102
 		{
 			logDebugGrammar("P - stringedef")
 		}
 	case 10:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line snowball.y:100
+		//line snowball.y:108
 		{
 
 		}
 	case 11:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:105
+		//line snowball.y:113
 		{
 			logDebugGrammar("STRINGDEFLITERALTYPE - hex")
 		}
 	case 12:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:110
+		//line snowball.y:118
 		{
 			logDebugGrammar("STRINGDEFLITERALTYPE - decimal")
 		}
 	case 13:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:116
+		//line snowball.y:124
 		{
-			logDebugGrammar("DECLARATION - strings")
+			logDebugGrammar("DECLARATION - strings named: %v", yyDollar[3].strings)
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sstring,
+				})
+			}
 		}
 	case 14:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:121
+		//line snowball.y:135
 		{
 			logDebugGrammar("DECLARATION - integers")
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sinteger,
+				})
+			}
 		}
 	case 15:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:126
+		//line snowball.y:146
 		{
 			logDebugGrammar("DECLARATION - booleans")
+			logDebugGrammar("DECLARATION - integers")
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sboolean,
+				})
+			}
 		}
 	case 16:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:131
+		//line snowball.y:158
 		{
 			logDebugGrammar("DECLARATION - routines")
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sroutine,
+				})
+			}
 		}
 	case 17:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:136
+		//line snowball.y:169
 		{
 			logDebugGrammar("DECLARATION - externals")
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sexternal,
+				})
+			}
 		}
 	case 18:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:141
+		//line snowball.y:180
 		{
 			logDebugGrammar("DECLARATION - groupings")
+			for _, name := range yyDollar[3].strings {
+				yyVAL.declarations = append(yyVAL.declarations, &decl{
+					name: name,
+					typ:  sgrouping,
+				})
+			}
 		}
 	case 19:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:148
+		//line snowball.y:193
 		{
 			logDebugGrammar("RDEF")
 		}
 	case 20:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:154
+		//line snowball.y:199
 		{
 			logDebugGrammar("NAMEORLITERAL - name")
 		}
 	case 21:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:159
+		//line snowball.y:204
 		{
 			logDebugGrammar("NAMEORLITERAL - literal")
 		}
 	case 22:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:165
+		//line snowball.y:210
 		{
 			logDebugGrammar("PLUSORMINUS - plus")
 		}
 	case 23:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:170
+		//line snowball.y:215
 		{
 			logDebugGrammar("PLUSORMINUS - minus")
 		}
 	case 24:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:176
+		//line snowball.y:221
 		{
 			logDebugGrammar("GPLUSMINUSLIST - single")
 		}
 	case 25:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:181
+		//line snowball.y:226
 		{
 			logDebugGrammar("GPLUSMINUSLIST - multi")
 		}
 	case 26:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:187
+		//line snowball.y:232
 		{
 			logDebugGrammar("GDEF")
 		}
 	case 27:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:193
+		//line snowball.y:238
 		{
 			logDebugGrammar("COMMANDS - single")
 		}
 	case 28:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:198
+		//line snowball.y:243
 		{
 			logDebugGrammar("COMMANDS - multi")
 		}
 	case 29:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:204
+		//line snowball.y:249
 		{
 			logDebugGrammar("COMMANDFACTOR - s")
 		}
 	case 30:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:209
+		//line snowball.y:254
 		{
 			logDebugGrammar("COMMAND - icommand")
 		}
 	case 31:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:214
+		//line snowball.y:259
 		{
 			logDebugGrammar("COMMAND - scommand")
 		}
 	case 32:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:219
+		//line snowball.y:264
 		{
 			logDebugGrammar("COMMAND - among empty")
 		}
 	case 33:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:224
+		//line snowball.y:269
 		{
 			logDebugGrammar("COMMAND - among list")
 		}
 	case 34:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:229
+		//line snowball.y:274
 		{
 			logDebugGrammar("COMMANDFACTOR - true")
 		}
 	case 35:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:234
+		//line snowball.y:279
 		{
 			logDebugGrammar("COMMANDFACTOR - false")
 		}
 	case 36:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:239
+		//line snowball.y:284
 		{
 			logDebugGrammar("COMMANDFACTOR - paren empty")
 		}
 	case 37:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:244
+		//line snowball.y:289
 		{
 			logDebugGrammar("COMMANDFACTOR - paren commands")
 		}
 	case 38:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:249
+		//line snowball.y:294
 		{
 			logDebugGrammar("COMMAND - unary not")
 		}
 	case 39:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:254
+		//line snowball.y:299
 		{
 			logDebugGrammar("COMMAND - unary test")
 		}
 	case 40:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:259
+		//line snowball.y:304
 		{
 			logDebugGrammar("COMMAND - unary try")
 		}
 	case 41:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:264
+		//line snowball.y:309
 		{
 			logDebugGrammar("COMMAND - unary do")
 		}
 	case 42:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:269
+		//line snowball.y:314
 		{
 			logDebugGrammar("COMMAND - unary fail")
 		}
 	case 43:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:274
+		//line snowball.y:319
 		{
 			logDebugGrammar("COMMAND - unary goto")
 		}
 	case 44:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:279
+		//line snowball.y:324
 		{
 			logDebugGrammar("COMMAND - unary gopast")
 		}
 	case 45:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:284
+		//line snowball.y:329
 		{
 			logDebugGrammar("COMMAND - unary repeat")
 		}
 	case 46:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:289
+		//line snowball.y:334
 		{
 			logDebugGrammar("COMMAND - loop ae")
 		}
 	case 47:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:294
+		//line snowball.y:339
 		{
 			logDebugGrammar("COMMAND - loop ae")
 		}
 	case 48:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:299
+		//line snowball.y:344
 		{
 			logDebugGrammar("COMMAND - insert")
 		}
 	case 49:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:304
+		//line snowball.y:349
 		{
 			logDebugGrammar("COMMAND - attach")
 		}
 	case 50:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:309
+		//line snowball.y:354
 		{
 			logDebugGrammar("COMMAND - replace")
 		}
 	case 51:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:314
+		//line snowball.y:359
 		{
 			logDebugGrammar("COMMAND - delete")
 		}
 	case 52:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:319
+		//line snowball.y:364
 		{
 			logDebugGrammar("COMMAND - hop")
 		}
 	case 53:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:324
+		//line snowball.y:369
 		{
 			logDebugGrammar("COMMAND - next")
 		}
 	case 54:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:329
+		//line snowball.y:374
 		{
 			logDebugGrammar("COMMAND - assign right")
 		}
 	case 55:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:334
+		//line snowball.y:379
 		{
 			logDebugGrammar("COMMAND - lbracket")
 		}
 	case 56:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:339
+		//line snowball.y:384
 		{
 			logDebugGrammar("COMMAND - rbracket")
 		}
 	case 57:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:344
+		//line snowball.y:389
 		{
 			logDebugGrammar("COMMAND - move right")
 		}
 	case 58:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:349
+		//line snowball.y:394
 		{
 			logDebugGrammar("COMMAND - setmark")
 		}
 	case 59:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:354
+		//line snowball.y:399
 		{
 			logDebugGrammar("COMMAND - tomark")
 		}
 	case 60:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:359
+		//line snowball.y:404
 		{
 			logDebugGrammar("COMMAND - atmark")
 		}
 	case 61:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:364
+		//line snowball.y:409
 		{
 			logDebugGrammar("COMMAND - tolimit")
 		}
 	case 62:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:369
+		//line snowball.y:414
 		{
 			logDebugGrammar("COMMAND - atlimit")
 		}
 	case 63:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:374
+		//line snowball.y:419
 		{
 			logDebugGrammar("COMMAND - setlimit")
 		}
 	case 64:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:379
+		//line snowball.y:424
 		{
 			logDebugGrammar("COMMAND - backwards")
 		}
 	case 65:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:384
+		//line snowball.y:429
 		{
 			logDebugGrammar("COMMAND - reverse")
 		}
 	case 66:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:389
+		//line snowball.y:434
 		{
 			logDebugGrammar("COMMAND - substring")
 		}
 	case 67:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:394
+		//line snowball.y:439
 		{
 			logDebugGrammar("COMMAND - set")
 		}
 	case 68:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:399
+		//line snowball.y:444
 		{
 			logDebugGrammar("COMMAND - unset")
 		}
 	case 69:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:404
+		//line snowball.y:449
 		{
 			logDebugGrammar("COMMAND - non")
 		}
 	case 70:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:409
+		//line snowball.y:454
 		{
 			logDebugGrammar("COMMAND - non minus")
 		}
 	case 71:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:414
+		//line snowball.y:459
 		{
 			logDebugGrammar("COMMAND - question")
 		}
 	case 72:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:419
+		//line snowball.y:464
 		{
 			logDebugGrammar("COMMANDTERM - or")
 		}
 	case 73:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:424
+		//line snowball.y:469
 		{
 			logDebugGrammar("COMMANDTERM - and")
 		}
 	case 74:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:431
+		//line snowball.y:476
 		{
 			logDebugGrammar("AMONGLIST - single")
 		}
 	case 75:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:435
+		//line snowball.y:480
 		{
 			logDebugGrammar("AMONGLIST - multi")
 		}
 	case 76:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:441
+		//line snowball.y:486
 		{
 			logDebugGrammar("AMONGITEM - literal")
 		}
 	case 77:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:446
+		//line snowball.y:491
 		{
 			logDebugGrammar("AMONGITEM - literal name")
 		}
 	case 78:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:451
+		//line snowball.y:496
 		{
 			logDebugGrammar("AMONGITEM - paren empty")
 		}
 	case 79:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:456
+		//line snowball.y:501
 		{
 			logDebugGrammar("AMONGITEM - paren command")
 		}
 	case 80:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:462
+		//line snowball.y:507
 		{
 			logDebugGrammar("SCOMMAND")
 		}
 	case 81:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:468
+		//line snowball.y:513
 		{
 			logDebugGrammar("ICOMMAND - assign")
 		}
 	case 82:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:473
+		//line snowball.y:518
 		{
 			logDebugGrammar("ICOMMAND - plus assign")
 		}
 	case 83:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:478
+		//line snowball.y:523
 		{
 			logDebugGrammar("ICOMMAND - minus assign")
 		}
 	case 84:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:483
+		//line snowball.y:528
 		{
 			logDebugGrammar("ICOMMAND - mult assign")
 		}
 	case 85:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:488
+		//line snowball.y:533
 		{
 			logDebugGrammar("ICOMMAND - div assign")
 		}
 	case 86:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:493
+		//line snowball.y:538
 		{
 			logDebugGrammar("ICOMMAND - eq")
 		}
 	case 87:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:498
+		//line snowball.y:543
 		{
 			logDebugGrammar("ICOMMAND - neq")
 		}
 	case 88:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:503
+		//line snowball.y:548
 		{
 			logDebugGrammar("ICOMMAND - greater than")
 		}
 	case 89:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:508
+		//line snowball.y:553
 		{
 			logDebugGrammar("ICOMMAND - less than")
 		}
 	case 90:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:513
+		//line snowball.y:558
 		{
 			logDebugGrammar("ICOMMAND - greater than or eq")
 		}
 	case 91:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:518
+		//line snowball.y:563
 		{
 			logDebugGrammar("ICOMMAND - less than or eq")
 		}
 	case 92:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:524
+		//line snowball.y:569
 		{
 			logDebugGrammar("AE - plus")
 		}
 	case 93:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:529
+		//line snowball.y:574
 		{
 			logDebugGrammar("AE - minus")
 		}
 	case 94:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:534
+		//line snowball.y:579
 		{
 			logDebugGrammar("AE - term")
 		}
 	case 95:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:539
+		//line snowball.y:584
 		{
 			logDebugGrammar("AE - unary minus")
 		}
 	case 96:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:544
+		//line snowball.y:589
 		{
 			logDebugGrammar("AE - maxint")
 		}
 	case 97:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:549
+		//line snowball.y:594
 		{
 			logDebugGrammar("AE - minint")
 		}
 	case 98:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:554
+		//line snowball.y:599
 		{
 			logDebugGrammar("AE - cursor")
 		}
 	case 99:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:559
+		//line snowball.y:604
 		{
 			logDebugGrammar("AE - limit")
 		}
 	case 100:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:564
+		//line snowball.y:609
 		{
 			logDebugGrammar("AE - size")
 		}
 	case 101:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:569
+		//line snowball.y:614
 		{
 			logDebugGrammar("AE - sizeof name")
 		}
 	case 102:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:574
+		//line snowball.y:619
 		{
 			logDebugGrammar("AE - len")
 		}
 	case 103:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:579
+		//line snowball.y:624
 		{
 			logDebugGrammar("AE - leno name")
 		}
 	case 104:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:586
+		//line snowball.y:631
 		{
 			logDebugGrammar("TERM - factor")
 		}
 	case 105:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:591
+		//line snowball.y:636
 		{
 			logDebugGrammar("TERM - mult")
 		}
 	case 106:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:596
+		//line snowball.y:641
 		{
 			logDebugGrammar("TERM - div")
 		}
 	case 107:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:602
+		//line snowball.y:647
 		{
 			logDebugGrammar("FACTOR - name")
 		}
 	case 108:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:607
+		//line snowball.y:652
 		{
 			logDebugGrammar("FACTOR - number")
 		}
 	case 109:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:612
+		//line snowball.y:657
 		{
 			logDebugGrammar("FACTOR - parens")
 		}
 	case 110:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:618
+		//line snowball.y:663
 		{
 			logDebugGrammar("NAMES - single")
+			yyVAL.strings = []string{yyDollar[1].s}
 		}
 	case 111:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:623
+		//line snowball.y:669
 		{
 			logDebugGrammar("NAMEs - multi")
+			yyVAL.strings = append(yyDollar[2].strings, "")
+			copy(yyVAL.strings[1:], yyVAL.strings[0:])
+			yyVAL.strings[0] = yyDollar[1].s
 		}
 	}
 	goto yystack /* stack new state and value */

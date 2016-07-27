@@ -383,6 +383,36 @@ func TestLexer(t *testing.T) {
 			},
 		},
 		{
+			in:            "i",
+			outTokenTypes: []int{tNAME},
+			outTokens: []yySymType{
+				{
+					s: "i",
+				},
+			},
+		},
+		{
+			in:            "int2",
+			outTokenTypes: []int{tNAME},
+			outTokens: []yySymType{
+				{
+					s: "int2",
+				},
+			},
+		},
+		{
+			in:            "i int2",
+			outTokenTypes: []int{tNAME, tNAME},
+			outTokens: []yySymType{
+				{
+					s: "i",
+				},
+				{
+					s: "int2",
+				},
+			},
+		},
+		{
 			in:            "<+",
 			outTokenTypes: []int{tINSERT},
 			outTokens: []yySymType{
