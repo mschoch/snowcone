@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("error opening snowball source file %s: %v", flag.Arg(0), err)
 	}
 
-	err = snowcone.Parse(f)
+	_, err = snowcone.Parse(f)
 	if err != nil {
 		log.Fatalf("parse error: %v", err)
 	}
