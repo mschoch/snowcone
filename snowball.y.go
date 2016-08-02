@@ -21,6 +21,18 @@ type yySymType struct {
 	n            int
 	strings      []string
 	declarations decls
+	gitems       groupitems
+	g            *grouping
+	no           node
+	b            *bliteral
+	r            *routine
+	q            *question
+	a            *amongitem
+	ai           amongitems
+	aexpr        ae
+	ic           *iCommand
+	sc           *sCommand
+	p            *prog
 }
 
 const tLITERAL = 57346
@@ -104,6 +116,7 @@ const tSTRINGESCAPES = 57423
 const tSTRINGDEF = 57424
 const tHEX = 57425
 const tDECIMAL = 57426
+const tUMINUS = 57427
 
 var yyToknames = [...]string{
 	"$end",
@@ -190,6 +203,7 @@ var yyToknames = [...]string{
 	"tSTRINGDEF",
 	"tHEX",
 	"tDECIMAL",
+	"tUMINUS",
 }
 var yyStatenames = [...]string{}
 
@@ -204,60 +218,45 @@ var yyExca = [...]int{
 	-2, 0,
 }
 
-const yyNprod = 112
+const yyNprod = 109
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 554
+const yyLast = 629
 
 var yyAct = [...]int{
 
-	110, 100, 146, 111, 20, 21, 96, 97, 52, 198,
-	39, 10, 11, 12, 13, 14, 15, 96, 97, 16,
-	157, 158, 2, 152, 153, 98, 17, 139, 94, 95,
-	123, 122, 31, 183, 101, 162, 175, 40, 124, 140,
-	149, 29, 42, 112, 41, 161, 113, 114, 115, 116,
-	117, 118, 119, 120, 38, 50, 33, 34, 35, 36,
-	37, 177, 123, 122, 49, 45, 148, 48, 178, 125,
-	124, 156, 47, 51, 129, 46, 145, 44, 126, 127,
-	128, 132, 133, 7, 43, 8, 9, 27, 26, 25,
-	24, 23, 22, 18, 102, 103, 104, 105, 106, 107,
-	108, 109, 40, 150, 142, 42, 155, 41, 141, 138,
-	137, 131, 130, 154, 32, 28, 148, 30, 121, 134,
-	135, 136, 147, 54, 53, 159, 93, 19, 6, 5,
-	3, 143, 144, 1, 4, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 151, 0, 0, 0, 0,
-	176, 0, 0, 179, 180, 0, 0, 0, 0, 0,
-	160, 181, 182, 0, 0, 185, 186, 187, 188, 189,
-	190, 191, 192, 193, 194, 195, 163, 42, 0, 41,
-	197, 0, 0, 0, 0, 0, 58, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 184, 0, 0, 0,
+	109, 99, 145, 39, 31, 52, 20, 21, 95, 96,
+	95, 96, 184, 154, 155, 152, 153, 154, 155, 152,
+	153, 154, 155, 100, 93, 94, 137, 197, 33, 34,
+	35, 36, 37, 175, 40, 2, 161, 45, 138, 17,
+	10, 11, 12, 13, 14, 15, 147, 42, 16, 41,
+	149, 147, 50, 49, 29, 148, 144, 30, 48, 38,
+	148, 97, 51, 47, 46, 44, 43, 27, 26, 122,
+	25, 24, 23, 22, 126, 123, 124, 125, 18, 177,
+	162, 130, 131, 101, 102, 103, 104, 105, 106, 107,
+	108, 42, 158, 41, 157, 139, 136, 140, 141, 40,
+	40, 135, 150, 129, 128, 127, 32, 28, 132, 133,
+	134, 156, 7, 19, 8, 9, 1, 3, 54, 142,
+	143, 53, 159, 146, 5, 6, 4, 0, 0, 0,
+	0, 0, 0, 151, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 160, 0, 0, 176,
+	179, 0, 0, 180, 181, 182, 183, 0, 0, 0,
+	0, 0, 0, 163, 0, 186, 187, 188, 189, 190,
+	191, 192, 193, 194, 195, 196, 0, 42, 0, 41,
+	0, 0, 0, 0, 0, 185, 58, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 92, 164, 165, 166, 167, 168, 169, 170,
 	171, 172, 173, 174, 0, 0, 59, 60, 61, 62,
 	63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
 	73, 74, 75, 76, 77, 78, 79, 80, 81, 82,
 	83, 84, 0, 85, 86, 87, 55, 88, 89, 90,
 	56, 57, 42, 91, 41, 0, 0, 0, 0, 0,
-	0, 58, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 92, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 96,
-	97, 59, 60, 61, 62, 63, 64, 65, 66, 67,
-	68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
-	78, 79, 80, 81, 82, 83, 84, 0, 85, 86,
-	87, 55, 88, 89, 90, 56, 57, 42, 91, 41,
-	0, 0, 0, 0, 0, 0, 58, 196, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 92, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 59, 60, 61, 62,
-	63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
-	73, 74, 75, 76, 77, 78, 79, 80, 81, 82,
-	83, 84, 0, 85, 86, 87, 55, 88, 89, 90,
-	56, 57, 42, 91, 41, 0, 0, 0, 0, 0,
-	0, 58, 99, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 92, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 58, 120, 119, 0, 152, 153, 154, 155, 0,
+	121, 0, 0, 0, 0, 110, 0, 92, 111, 112,
+	113, 114, 115, 116, 117, 118, 0, 0, 0, 0,
 	0, 59, 60, 61, 62, 63, 64, 65, 66, 67,
 	68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
 	78, 79, 80, 81, 82, 83, 84, 0, 85, 86,
@@ -265,116 +264,135 @@ var yyAct = [...]int{
 	0, 0, 0, 0, 0, 0, 58, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 92, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 95, 96, 59, 60, 61, 62,
+	63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
+	73, 74, 75, 76, 77, 78, 79, 80, 81, 82,
+	83, 84, 0, 85, 86, 87, 55, 88, 89, 90,
+	56, 57, 42, 91, 41, 0, 0, 0, 0, 0,
+	0, 58, 178, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 92, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 59, 60, 61, 62, 63, 64, 65, 66, 67,
+	68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+	78, 79, 80, 81, 82, 83, 84, 0, 85, 86,
+	87, 55, 88, 89, 90, 56, 57, 42, 91, 41,
+	0, 0, 0, 0, 0, 0, 58, 98, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 92, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 59, 60, 61, 62,
 	63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
 	73, 74, 75, 76, 77, 78, 79, 80, 81, 82,
 	83, 84, 0, 85, 86, 87, 55, 88, 89, 90,
-	56, 57, 0, 91,
+	56, 57, 42, 91, 41, 0, 0, 0, 0, 0,
+	0, 58, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 92, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 59, 60, 61, 62, 63, 64, 65, 66, 67,
+	68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+	78, 79, 80, 81, 82, 83, 84, 0, 85, 86,
+	87, 55, 88, 89, 90, 56, 57, 0, 91,
 }
 var yyPact = [...]int{
 
-	4, -1000, -1000, 4, -1000, -1000, -1000, 80, -1000, -79,
-	79, 78, 77, 76, 75, 74, 109, -1000, 4, 113,
-	-1000, -1000, 108, 108, 108, 108, 108, 108, 38, 70,
-	-1000, 63, 108, 61, 58, 53, 50, 41, 473, -1000,
-	11, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -35, -1000, -1000, -1000, 12, -1000, -1000, 398, 473,
-	473, 473, 473, 473, 473, 473, 473, 25, 25, 101,
-	101, 101, -1000, 25, -1000, -1000, -1000, -1000, 106, 105,
-	25, 25, -1000, -1000, 473, 473, 473, -1000, 104, 103,
-	21, -1000, 102, 101, -1000, -1000, 473, 473, 62, -1000,
-	26, 248, -35, -35, -35, -35, -35, -35, -35, -35,
-	473, 6, 25, -1000, -1000, -1000, -1000, -1000, 100, -1000,
-	65, 1, -1000, -1000, 25, 473, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, -24, -35, -35, -1000, -1000, -1000,
-	29, 173, -1000, -1000, -1000, -1000, 22, 112, 55, -1000,
-	-1000, -35, 25, 25, -1000, -1000, -1000, 57, 57, 19,
-	-35, 473, -1000, -35, 25, 25, 25, 25, 25, 25,
-	25, 25, 25, 25, 25, -1000, -1000, -1000, 323, -1000,
-	-1000, -1000, -1000, -1000, -35, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -5, -1000,
+	33, -1000, -1000, 33, -1000, -1000, -1000, 65, -1000, -77,
+	60, 59, 58, 57, 55, 54, 101, -1000, 33, 53,
+	-1000, -1000, 100, 100, 100, 100, 100, 100, 43, 52,
+	-1000, 51, 100, 50, 49, 44, 39, 38, 548, -1000,
+	7, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	-1000, -31, -1000, -1000, -1000, 48, -1000, -1000, 473, 548,
+	548, 548, 548, 548, 548, 548, 548, 257, 257, 87,
+	87, 87, -1000, 257, -1000, 99, -1000, -1000, 98, 97,
+	257, 257, -1000, -1000, 548, 548, 548, -1000, 95, 90,
+	20, -1000, 89, 87, 87, 548, 548, 42, -1000, 36,
+	323, -31, -31, -31, -31, -31, -31, -31, -31, 248,
+	257, -1000, -1000, -1000, -1000, -1000, 88, -1000, 86, -1000,
+	-1000, 257, 248, -1000, -1000, -1000, 2, -1000, -1000, -1000,
+	2, 2, -33, -31, -31, -1000, -1000, -1000, 74, 173,
+	-1000, -1000, -1000, -1000, -1000, 19, 47, 73, 398, -1000,
+	-1000, -31, 257, 257, 257, 257, -1000, -1000, -1000, -2,
+	-31, 548, -1000, -31, 257, 257, 257, 257, 257, 257,
+	257, 257, 257, 257, 257, -1000, -1000, -1000, -1000, 13,
+	-6, -6, -1000, -1000, -1000, -31, 2, 2, 2, 2,
+	2, 2, 2, 2, 2, 2, 2, -1000,
 }
 var yyPgo = [...]int{
 
-	0, 32, 134, 133, 22, 130, 129, 128, 127, 34,
-	8, 126, 10, 1, 124, 123, 2, 0, 122, 3,
-	118,
+	0, 4, 126, 3, 5, 125, 23, 124, 123, 2,
+	1, 0, 121, 118, 117, 35, 116, 113,
 }
 var yyR1 = [...]int{
 
-	0, 3, 4, 4, 5, 5, 5, 5, 5, 5,
-	8, 8, 8, 2, 2, 2, 2, 2, 2, 6,
-	10, 10, 11, 11, 12, 12, 7, 13, 13, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-	9, 9, 9, 9, 16, 16, 18, 18, 18, 18,
-	15, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-	14, 14, 17, 17, 17, 17, 17, 17, 17, 17,
-	17, 17, 17, 17, 19, 19, 19, 20, 20, 20,
-	1, 1,
+	0, 16, 15, 15, 14, 14, 14, 14, 14, 14,
+	17, 17, 17, 2, 2, 2, 2, 2, 2, 7,
+	4, 4, 3, 3, 3, 5, 10, 10, 6, 6,
+	6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+	6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+	6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+	6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+	6, 6, 6, 9, 9, 8, 8, 8, 8, 13,
+	12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+	12, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+	11, 11, 11, 11, 11, 11, 11, 1, 1,
 }
 var yyR2 = [...]int{
 
 	0, 1, 1, 2, 1, 1, 1, 4, 1, 3,
 	0, 1, 1, 4, 4, 4, 4, 4, 4, 4,
-	1, 1, 1, 1, 1, 3, 3, 1, 2, 1,
-	1, 1, 3, 4, 1, 1, 2, 3, 2, 2,
-	2, 2, 2, 2, 2, 2, 3, 3, 2, 2,
-	2, 1, 2, 1, 1, 1, 1, 2, 2, 2,
-	2, 1, 1, 4, 2, 2, 1, 2, 2, 2,
-	3, 1, 3, 3, 1, 2, 1, 2, 3, 4,
-	3, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	4, 4, 3, 3, 1, 2, 1, 1, 1, 1,
-	1, 2, 1, 2, 1, 3, 3, 1, 1, 3,
-	1, 2,
+	1, 1, 1, 3, 3, 3, 1, 2, 1, 1,
+	1, 3, 4, 1, 1, 2, 3, 2, 2, 2,
+	2, 2, 2, 2, 2, 3, 3, 2, 2, 2,
+	1, 2, 1, 2, 1, 1, 2, 2, 2, 2,
+	1, 1, 4, 2, 2, 1, 2, 2, 2, 3,
+	1, 3, 3, 1, 2, 1, 2, 2, 3, 3,
+	4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+	4, 3, 3, 3, 3, 2, 1, 1, 1, 1,
+	1, 2, 1, 2, 1, 1, 3, 1, 2,
 }
 var yyChk = [...]int{
 
-	-1000, -3, -4, -5, -2, -6, -7, 79, 81, 82,
-	7, 8, 9, 10, 11, 12, 15, -4, 13, -8,
-	83, 84, 13, 13, 13, 13, 13, 13, 6, -4,
-	4, -1, 6, -1, -1, -1, -1, -1, 16, -12,
-	-10, 6, 4, 14, 14, -1, 14, 14, 14, 14,
-	14, -9, -10, -14, -15, 73, 77, 78, 13, 43,
+	-1000, -16, -15, -14, -2, -7, -5, 79, 81, 82,
+	7, 8, 9, 10, 11, 12, 15, -15, 13, -17,
+	83, 84, 13, 13, 13, 13, 13, 13, 6, -15,
+	4, -1, 6, -1, -1, -1, -1, -1, 16, -3,
+	-4, 6, 4, 14, 14, -1, 14, 14, 14, 14,
+	14, -6, -4, -12, -13, 73, 77, 78, 13, 43,
 	44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
 	54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
 	64, 65, 66, 67, 68, 70, 71, 72, 74, 75,
-	76, 80, 29, -11, 17, 18, 41, 42, 13, 14,
-	-13, -9, -9, -9, -9, -9, -9, -9, -9, -9,
-	-17, -19, 18, 21, 22, 23, 24, 25, 26, 27,
-	28, -20, 6, 5, 13, -17, -10, -10, -10, -17,
-	6, 6, -17, -17, -9, -9, -9, 6, 6, 6,
-	18, 6, -12, -9, -9, 14, -16, -18, 4, 14,
-	-13, -9, 17, 18, -17, 6, 6, 19, 20, -17,
-	-9, 69, 6, -9, 30, 31, 32, 33, 34, 35,
-	36, 37, 38, 39, 40, 14, -16, 6, 13, -17,
-	-17, -19, -19, 14, -9, -17, -17, -17, -17, -17,
-	-17, -17, -17, -17, -17, -17, 14, -13, 14,
+	76, 80, 29, 17, 18, 41, 42, 13, 14, -10,
+	-6, -6, -6, -6, -6, -6, -6, -6, -6, -11,
+	18, 21, 22, 23, 24, 25, 26, 27, 28, 6,
+	5, 13, -11, -4, -4, -4, -11, 6, 6, 6,
+	-11, -11, -6, -6, -6, 6, 6, 6, 18, 6,
+	-3, -3, -6, -6, 14, -9, -8, 4, 13, 14,
+	-10, -6, 17, 18, 19, 20, -11, 6, 6, -11,
+	-6, 69, 6, -6, 30, 31, 32, 33, 34, 35,
+	36, 37, 38, 39, 40, 14, -9, 6, 14, -10,
+	-11, -11, -11, -11, 14, -6, -11, -11, -11, -11,
+	-11, -11, -11, -11, -11, -11, -11, 14,
 }
 var yyDef = [...]int{
 
 	0, -2, 1, 2, 4, 5, 6, 0, 8, 10,
 	0, 0, 0, 0, 0, 0, 0, 3, 0, 0,
 	11, 12, 0, 0, 0, 0, 0, 0, 0, 0,
-	9, 0, 110, 0, 0, 0, 0, 0, 0, 26,
-	24, 20, 21, 7, 13, 111, 14, 15, 16, 17,
-	18, 19, 29, 30, 31, 0, 34, 35, 0, 0,
+	9, 0, 107, 0, 0, 0, 0, 0, 0, 25,
+	22, 20, 21, 7, 13, 108, 14, 15, 16, 17,
+	18, 19, 28, 29, 30, 0, 33, 34, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 51, 0, 53, 54, 55, 56, 0, 0,
-	0, 0, 61, 62, 0, 0, 0, 66, 0, 0,
-	0, 71, 0, 0, 22, 23, 0, 0, 0, 36,
-	0, 27, 38, 39, 40, 41, 42, 43, 44, 45,
-	0, 94, 0, 96, 97, 98, 99, 100, 0, 102,
-	0, 104, 107, 108, 0, 0, 48, 49, 50, 52,
-	57, 58, 59, 60, 0, 64, 65, 67, 68, 69,
-	0, 0, 25, 72, 73, 32, 0, 74, 76, 37,
-	28, 46, 0, 0, 95, 101, 103, 0, 0, 0,
-	47, 0, 70, 80, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 33, 75, 77, 0, 92,
-	93, 105, 106, 109, 63, 81, 82, 83, 84, 85,
-	86, 87, 88, 89, 90, 91, 78, 0, 79,
+	0, 0, 50, 0, 52, 0, 54, 55, 0, 0,
+	0, 0, 60, 61, 0, 0, 0, 65, 0, 0,
+	0, 70, 0, 0, 0, 0, 0, 0, 35, 0,
+	26, 37, 38, 39, 40, 41, 42, 43, 44, 0,
+	0, 96, 97, 98, 99, 100, 0, 102, 0, 104,
+	105, 0, 0, 47, 48, 49, 51, 53, 56, 57,
+	58, 59, 0, 63, 64, 66, 67, 68, 0, 0,
+	23, 24, 71, 72, 31, 0, 73, 75, 0, 36,
+	27, 45, 0, 0, 0, 0, 95, 101, 103, 0,
+	46, 0, 69, 79, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 32, 74, 76, 77, 0,
+	91, 92, 93, 94, 106, 62, 80, 81, 82, 83,
+	84, 85, 86, 87, 88, 89, 90, 78,
 }
 var yyTok1 = [...]int{
 
@@ -390,7 +408,7 @@ var yyTok2 = [...]int{
 	52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
 	62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
 	72, 73, 74, 75, 76, 77, 78, 79, 80, 81,
-	82, 83, 84,
+	82, 83, 84, 85,
 }
 var yyTok3 = [...]int{
 	0,
@@ -735,52 +753,66 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:50
+		//line snowball.y:81
 		{
 			logDebugGrammar("INPUT - %v", yylex.(*lexerWrapper).p)
+			yylex.(*lexerWrapper).p = yyDollar[1].p
 		}
 	case 2:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:56
+		//line snowball.y:88
 		{
 			logDebugGrammar("PROGRAM - single")
+			yyVAL.p = yyDollar[1].p
 		}
 	case 3:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:61
+		//line snowball.y:94
 		{
 			logDebugGrammar("PROGRAM - multi")
+			yyDollar[2].p.Combine(yyDollar[1].p)
+			yyVAL.p = yyDollar[2].p
 		}
 	case 4:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:67
+		//line snowball.y:102
 		{
+			p := &prog{}
 			logDebugGrammar("P - decl")
 			for _, decl := range yyDollar[1].declarations {
-				yylex.(*lexerWrapper).p.Declare(decl)
+				p.Declare(decl)
 			}
+			yyVAL.p = p
 		}
 	case 5:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:75
+		//line snowball.y:112
 		{
+			p := &prog{}
 			logDebugGrammar("P - rdef")
+			p.DefineRoutine(yyDollar[1].r)
+			yyVAL.p = p
 		}
 	case 6:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:80
+		//line snowball.y:120
 		{
+			p := &prog{}
 			logDebugGrammar("P - gdef")
+			p.DefineGroup(yyDollar[1].g)
+			yyVAL.p = p
 		}
 	case 7:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:85
+		//line snowball.y:128
 		{
 			logDebugGrammar("P - backwardmode")
+			yyDollar[3].p.SetBackwardMode()
+			yyVAL.p = yyDollar[3].p
 		}
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:90
+		//line snowball.y:135
 		{
 			if utf8.RuneCountInString(yyDollar[1].s) == 2 {
 				logDebugGrammar("P - stringescapes")
@@ -790,34 +822,36 @@ yydefault:
 			} else {
 				logDebugGrammar("P - stringescapes rune count NOT 2!!!")
 			}
+			yyVAL.p = &prog{}
 		}
 	case 9:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:102
+		//line snowball.y:148
 		{
 			logDebugGrammar("P - stringedef")
+			yyVAL.p = &prog{}
 		}
 	case 10:
 		yyDollar = yyS[yypt-0 : yypt+1]
-		//line snowball.y:108
+		//line snowball.y:155
 		{
 
 		}
 	case 11:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:113
+		//line snowball.y:160
 		{
 			logDebugGrammar("STRINGDEFLITERALTYPE - hex")
 		}
 	case 12:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:118
+		//line snowball.y:165
 		{
 			logDebugGrammar("STRINGDEFLITERALTYPE - decimal")
 		}
 	case 13:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:124
+		//line snowball.y:171
 		{
 			logDebugGrammar("DECLARATION - strings named: %v", yyDollar[3].strings)
 			for _, name := range yyDollar[3].strings {
@@ -829,7 +863,7 @@ yydefault:
 		}
 	case 14:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:135
+		//line snowball.y:182
 		{
 			logDebugGrammar("DECLARATION - integers")
 			for _, name := range yyDollar[3].strings {
@@ -841,7 +875,7 @@ yydefault:
 		}
 	case 15:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:146
+		//line snowball.y:193
 		{
 			logDebugGrammar("DECLARATION - booleans")
 			logDebugGrammar("DECLARATION - integers")
@@ -854,7 +888,7 @@ yydefault:
 		}
 	case 16:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:158
+		//line snowball.y:205
 		{
 			logDebugGrammar("DECLARATION - routines")
 			for _, name := range yyDollar[3].strings {
@@ -866,7 +900,7 @@ yydefault:
 		}
 	case 17:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:169
+		//line snowball.y:216
 		{
 			logDebugGrammar("DECLARATION - externals")
 			for _, name := range yyDollar[3].strings {
@@ -878,7 +912,7 @@ yydefault:
 		}
 	case 18:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:180
+		//line snowball.y:227
 		{
 			logDebugGrammar("DECLARATION - groupings")
 			for _, name := range yyDollar[3].strings {
@@ -890,560 +924,636 @@ yydefault:
 		}
 	case 19:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:193
+		//line snowball.y:240
 		{
 			logDebugGrammar("RDEF")
+			yyVAL.r = &routine{name: yyDollar[2].s, comm: yyDollar[4].no}
 		}
 	case 20:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:199
+		//line snowball.y:247
 		{
 			logDebugGrammar("NAMEORLITERAL - name")
+			yyVAL.no = &name{val: yyDollar[1].s}
 		}
 	case 21:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:204
+		//line snowball.y:253
 		{
 			logDebugGrammar("NAMEORLITERAL - literal")
+			yyVAL.no = &sliteral{val: yyDollar[1].s}
 		}
 	case 22:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:210
-		{
-			logDebugGrammar("PLUSORMINUS - plus")
-		}
-	case 23:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:215
-		{
-			logDebugGrammar("PLUSORMINUS - minus")
-		}
-	case 24:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:221
+		//line snowball.y:260
 		{
 			logDebugGrammar("GPLUSMINUSLIST - single")
+			yyVAL.gitems = groupitems{&groupitem{item: yyDollar[1].no}}
+		}
+	case 23:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:266
+		{
+			logDebugGrammar("GPLUSMINUSLIST - multi")
+			//$$ = append($3, &groupitem{item: $1})
+			yyVAL.gitems = append(yyDollar[3].gitems, nil)
+			copy(yyVAL.gitems[1:], yyVAL.gitems[0:])
+			yyVAL.gitems[0] = &groupitem{item: yyDollar[1].no}
+		}
+	case 24:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:275
+		{
+			logDebugGrammar("GPLUSMINUSLIST - MINUS multi")
+			//$$ = append($3, &groupitem{item: $1, minus:true})
+			yyVAL.gitems = append(yyDollar[3].gitems, nil)
+			copy(yyVAL.gitems[1:], yyVAL.gitems[0:])
+			yyVAL.gitems[0] = &groupitem{item: yyDollar[1].no}
+			yyVAL.gitems[1].minus = true
 		}
 	case 25:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:226
+		//line snowball.y:286
 		{
-			logDebugGrammar("GPLUSMINUSLIST - multi")
+			yyVAL.g = &grouping{name: yyDollar[2].s, children: yyDollar[3].gitems}
+			logDebugGrammar("GDEF - %v", yyVAL.g)
 		}
 	case 26:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:232
-		{
-			logDebugGrammar("GDEF")
-		}
-	case 27:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:238
+		//line snowball.y:293
 		{
 			logDebugGrammar("COMMANDS - single")
 		}
-	case 28:
+	case 27:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:243
+		//line snowball.y:298
 		{
 			logDebugGrammar("COMMANDS - multi")
 		}
-	case 29:
+	case 28:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:249
+		//line snowball.y:304
 		{
 			logDebugGrammar("COMMANDFACTOR - s")
+			yyVAL.no = yyDollar[1].no
+		}
+	case 29:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line snowball.y:310
+		{
+			logDebugGrammar("COMMAND - icommand")
+			yyVAL.no = yyDollar[1].ic
 		}
 	case 30:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:254
-		{
-			logDebugGrammar("COMMAND - icommand")
-		}
-	case 31:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:259
+		//line snowball.y:316
 		{
 			logDebugGrammar("COMMAND - scommand")
+			yyVAL.no = yyDollar[1].sc
 		}
-	case 32:
+	case 31:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:264
+		//line snowball.y:322
 		{
 			logDebugGrammar("COMMAND - among empty")
+			yyVAL.no = &among{}
 		}
-	case 33:
+	case 32:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:269
+		//line snowball.y:328
 		{
 			logDebugGrammar("COMMAND - among list")
+			yyVAL.no = &among{children: yyDollar[3].ai}
+		}
+	case 33:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line snowball.y:334
+		{
+			logDebugGrammar("COMMANDFACTOR - true")
+			yyVAL.no = &bliteral{val: true}
 		}
 	case 34:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:274
-		{
-			logDebugGrammar("COMMANDFACTOR - true")
-		}
-	case 35:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:279
+		//line snowball.y:340
 		{
 			logDebugGrammar("COMMANDFACTOR - false")
+			yyVAL.no = &bliteral{val: false}
 		}
-	case 36:
+	case 35:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:284
+		//line snowball.y:346
 		{
 			logDebugGrammar("COMMANDFACTOR - paren empty")
 		}
-	case 37:
+	case 36:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:289
+		//line snowball.y:351
 		{
 			logDebugGrammar("COMMANDFACTOR - paren commands")
+			yyVAL.no = yyDollar[2].no
+		}
+	case 37:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:357
+		{
+			logDebugGrammar("COMMAND - not")
+			yyVAL.no = &unaryCommand{command: "not", operandCommand: yyDollar[2].no}
 		}
 	case 38:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:294
+		//line snowball.y:363
 		{
-			logDebugGrammar("COMMAND - unary not")
+			logDebugGrammar("COMMAND - test")
+			yyVAL.no = &unaryCommand{command: "test", operandCommand: yyDollar[2].no}
 		}
 	case 39:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:299
+		//line snowball.y:369
 		{
-			logDebugGrammar("COMMAND - unary test")
+			logDebugGrammar("COMMAND - try")
+			yyVAL.no = &unaryCommand{command: "try", operandCommand: yyDollar[2].no}
 		}
 	case 40:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:304
+		//line snowball.y:375
 		{
-			logDebugGrammar("COMMAND - unary try")
+			logDebugGrammar("COMMAND - do")
+			yyVAL.no = &unaryCommand{command: "do", operandCommand: yyDollar[2].no}
 		}
 	case 41:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:309
+		//line snowball.y:381
 		{
-			logDebugGrammar("COMMAND - unary do")
+			logDebugGrammar("COMMAND - unary fail")
+			yyVAL.no = &unaryCommand{command: "fail", operandCommand: yyDollar[2].no}
 		}
 	case 42:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:314
+		//line snowball.y:387
 		{
-			logDebugGrammar("COMMAND - unary fail")
+			logDebugGrammar("COMMAND - goto")
+			yyVAL.no = &unaryCommand{command: "goto", operandCommand: yyDollar[2].no}
 		}
 	case 43:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:319
+		//line snowball.y:393
 		{
-			logDebugGrammar("COMMAND - unary goto")
+			logDebugGrammar("COMMAND - unary gopast")
+			yyVAL.no = &unaryCommand{command: "gopast", operandCommand: yyDollar[2].no}
 		}
 	case 44:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:324
-		{
-			logDebugGrammar("COMMAND - unary gopast")
-		}
-	case 45:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:329
+		//line snowball.y:399
 		{
 			logDebugGrammar("COMMAND - unary repeat")
+			yyVAL.no = &unaryCommand{command: "repeat", operandCommand: yyDollar[2].no}
+		}
+	case 45:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:405
+		{
+			logDebugGrammar("COMMAND - loop ae")
+			yyVAL.no = &loop{n: yyDollar[2].aexpr, operand: yyDollar[3].no}
 		}
 	case 46:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:334
+		//line snowball.y:411
 		{
 			logDebugGrammar("COMMAND - loop ae")
+			yyVAL.no = &loop{n: yyDollar[2].aexpr, operand: yyDollar[3].no, extra: true}
 		}
 	case 47:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:339
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:417
 		{
-			logDebugGrammar("COMMAND - loop ae")
+			logDebugGrammar("COMMAND - insert")
+			yyVAL.no = &unaryCommand{command: "insert", operandCommand: yyDollar[2].no}
 		}
 	case 48:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:344
+		//line snowball.y:423
 		{
-			logDebugGrammar("COMMAND - insert")
+			logDebugGrammar("COMMAND - attach")
+			yyVAL.no = &unaryCommand{command: "attach", operandCommand: yyDollar[2].no}
 		}
 	case 49:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:349
-		{
-			logDebugGrammar("COMMAND - attach")
-		}
-	case 50:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:354
+		//line snowball.y:429
 		{
 			logDebugGrammar("COMMAND - replace")
+			yyVAL.no = &unaryCommand{command: "replace", operandCommand: yyDollar[2].no}
 		}
-	case 51:
+	case 50:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:359
+		//line snowball.y:435
 		{
 			logDebugGrammar("COMMAND - delete")
+			yyVAL.no = &nilaryCommand{operator: "delete"}
 		}
-	case 52:
+	case 51:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:364
+		//line snowball.y:441
 		{
 			logDebugGrammar("COMMAND - hop")
+			yyVAL.no = &unaryCommand{command: "hop", operandCommand: yyDollar[2].aexpr}
 		}
-	case 53:
+	case 52:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:369
+		//line snowball.y:447
 		{
 			logDebugGrammar("COMMAND - next")
+			yyVAL.no = &nilaryCommand{operator: "next"}
+		}
+	case 53:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:453
+		{
+			logDebugGrammar("COMMAND - assign right")
+			yyVAL.no = &unaryCommand{command: "assignr", operandName: &name{val: yyDollar[2].s}}
 		}
 	case 54:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:374
+		//line snowball.y:459
 		{
-			logDebugGrammar("COMMAND - assign right")
+			logDebugGrammar("COMMAND - lbracket")
+			yyVAL.no = &nilaryCommand{operator: "["}
 		}
 	case 55:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:379
-		{
-			logDebugGrammar("COMMAND - lbracket")
-		}
-	case 56:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:384
+		//line snowball.y:465
 		{
 			logDebugGrammar("COMMAND - rbracket")
+			yyVAL.no = &nilaryCommand{operator: "]"}
+		}
+	case 56:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:471
+		{
+			logDebugGrammar("COMMAND - move right")
+			yyVAL.no = &unaryCommand{command: "mover", operandName: &name{val: yyDollar[2].s}}
 		}
 	case 57:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:389
+		//line snowball.y:477
 		{
-			logDebugGrammar("COMMAND - move right")
+			logDebugGrammar("COMMAND - setmark")
+			yyVAL.no = &unaryCommand{command: "setmark", operandName: &name{val: yyDollar[2].s}}
 		}
 	case 58:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:394
+		//line snowball.y:483
 		{
-			logDebugGrammar("COMMAND - setmark")
+			logDebugGrammar("COMMAND - tomark")
+			yyVAL.no = &unaryCommand{command: "tomark", operandAe: yyDollar[2].aexpr}
 		}
 	case 59:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:399
-		{
-			logDebugGrammar("COMMAND - tomark")
-		}
-	case 60:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:404
+		//line snowball.y:489
 		{
 			logDebugGrammar("COMMAND - atmark")
+			yyVAL.no = &unaryCommand{command: "atmark", operandAe: yyDollar[2].aexpr}
+		}
+	case 60:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line snowball.y:495
+		{
+			logDebugGrammar("COMMAND - tolimit")
+			yyVAL.no = &nilaryCommand{operator: "tolimit"}
 		}
 	case 61:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:409
-		{
-			logDebugGrammar("COMMAND - tolimit")
-		}
-	case 62:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:414
+		//line snowball.y:501
 		{
 			logDebugGrammar("COMMAND - atlimit")
+			yyVAL.no = &nilaryCommand{operator: "atlimit"}
 		}
-	case 63:
+	case 62:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:419
+		//line snowball.y:507
 		{
 			logDebugGrammar("COMMAND - setlimit")
+			yyVAL.no = &binaryCommand{left: yyDollar[2].no, operator: "setlimitfor", right: yyDollar[4].no}
+		}
+	case 63:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:513
+		{
+			logDebugGrammar("COMMAND - backwards")
+			yyVAL.no = &unaryCommand{command: "backwards", operandCommand: yyDollar[2].no}
 		}
 	case 64:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:424
-		{
-			logDebugGrammar("COMMAND - backwards")
-		}
-	case 65:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:429
+		//line snowball.y:519
 		{
 			logDebugGrammar("COMMAND - reverse")
+			yyVAL.no = &unaryCommand{command: "reverse", operandCommand: yyDollar[2].no}
 		}
-	case 66:
+	case 65:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:434
+		//line snowball.y:525
 		{
 			logDebugGrammar("COMMAND - substring")
+			yyVAL.no = &nilaryCommand{operator: "substring"}
+		}
+	case 66:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:531
+		{
+			logDebugGrammar("COMMAND - set")
+			yyVAL.no = &set{bname: yyDollar[2].s}
 		}
 	case 67:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:439
+		//line snowball.y:537
 		{
-			logDebugGrammar("COMMAND - set")
+			logDebugGrammar("COMMAND - unset")
+			yyVAL.no = &unset{bname: yyDollar[2].s}
 		}
 	case 68:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:444
-		{
-			logDebugGrammar("COMMAND - unset")
-		}
-	case 69:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:449
+		//line snowball.y:543
 		{
 			logDebugGrammar("COMMAND - non")
+			yyVAL.no = &non{gname: yyDollar[2].s}
 		}
-	case 70:
+	case 69:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:454
+		//line snowball.y:549
 		{
 			logDebugGrammar("COMMAND - non minus")
+			yyVAL.no = &non{gname: yyDollar[3].s, minus: true}
 		}
-	case 71:
+	case 70:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:459
+		//line snowball.y:555
 		{
 			logDebugGrammar("COMMAND - question")
+			yyVAL.no = &question{}
+		}
+	case 71:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:561
+		{
+			logDebugGrammar("COMMANDTERM - or")
+			yyVAL.no = &binaryCommand{left: yyDollar[1].no, operator: "or", right: yyDollar[3].no}
 		}
 	case 72:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:464
-		{
-			logDebugGrammar("COMMANDTERM - or")
-		}
-	case 73:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:469
+		//line snowball.y:567
 		{
 			logDebugGrammar("COMMANDTERM - and")
+			yyVAL.no = &binaryCommand{left: yyDollar[1].no, operator: "and", right: yyDollar[3].no}
 		}
-	case 74:
+	case 73:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:476
+		//line snowball.y:575
 		{
 			logDebugGrammar("AMONGLIST - single")
+			yyVAL.ai = amongitems{yyDollar[1].a}
 		}
-	case 75:
+	case 74:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:480
+		//line snowball.y:580
 		{
 			logDebugGrammar("AMONGLIST - multi")
+			yyVAL.ai = append(yyDollar[2].ai, nil)
+			copy(yyVAL.ai[1:], yyVAL.ai[0:])
+			yyVAL.ai[0] = yyDollar[1].a
 		}
-	case 76:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:486
-		{
-			logDebugGrammar("AMONGITEM - literal")
-		}
-	case 77:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:491
-		{
-			logDebugGrammar("AMONGITEM - literal name")
-		}
-	case 78:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:496
-		{
-			logDebugGrammar("AMONGITEM - paren empty")
-		}
-	case 79:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:501
-		{
-			logDebugGrammar("AMONGITEM - paren command")
-		}
-	case 80:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:507
-		{
-			logDebugGrammar("SCOMMAND")
-		}
-	case 81:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:513
-		{
-			logDebugGrammar("ICOMMAND - assign")
-		}
-	case 82:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:518
-		{
-			logDebugGrammar("ICOMMAND - plus assign")
-		}
-	case 83:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:523
-		{
-			logDebugGrammar("ICOMMAND - minus assign")
-		}
-	case 84:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:528
-		{
-			logDebugGrammar("ICOMMAND - mult assign")
-		}
-	case 85:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:533
-		{
-			logDebugGrammar("ICOMMAND - div assign")
-		}
-	case 86:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:538
-		{
-			logDebugGrammar("ICOMMAND - eq")
-		}
-	case 87:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:543
-		{
-			logDebugGrammar("ICOMMAND - neq")
-		}
-	case 88:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:548
-		{
-			logDebugGrammar("ICOMMAND - greater than")
-		}
-	case 89:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:553
-		{
-			logDebugGrammar("ICOMMAND - less than")
-		}
-	case 90:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:558
-		{
-			logDebugGrammar("ICOMMAND - greater than or eq")
-		}
-	case 91:
-		yyDollar = yyS[yypt-4 : yypt+1]
-		//line snowball.y:563
-		{
-			logDebugGrammar("ICOMMAND - less than or eq")
-		}
-	case 92:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:569
-		{
-			logDebugGrammar("AE - plus")
-		}
-	case 93:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:574
-		{
-			logDebugGrammar("AE - minus")
-		}
-	case 94:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:579
-		{
-			logDebugGrammar("AE - term")
-		}
-	case 95:
-		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:584
-		{
-			logDebugGrammar("AE - unary minus")
-		}
-	case 96:
+	case 75:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		//line snowball.y:589
 		{
+			logDebugGrammar("AMONGITEM - literal")
+			yyVAL.a = &amongitem{slit: &sliteral{val: yyDollar[1].s}}
+		}
+	case 76:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:595
+		{
+			logDebugGrammar("AMONGITEM - literal name")
+			yyVAL.a = &amongitem{slit: &sliteral{val: yyDollar[1].s}, rname: yyDollar[2].s}
+		}
+	case 77:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:601
+		{
+			logDebugGrammar("AMONGITEM - paren empty")
+			yyVAL.a = &amongitem{}
+		}
+	case 78:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:607
+		{
+			logDebugGrammar("AMONGITEM - paren command")
+			yyVAL.a = &amongitem{comm: yyDollar[2].no}
+		}
+	case 79:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:614
+		{
+			logDebugGrammar("SCOMMAND")
+			yyVAL.sc = &sCommand{name: &name{val: yyDollar[2].s}, operand: yyDollar[3].no}
+		}
+	case 80:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:621
+		{
+			logDebugGrammar("ICOMMAND - assign")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "=", operand: yyDollar[4].aexpr}
+		}
+	case 81:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:627
+		{
+			logDebugGrammar("ICOMMAND - plus assign")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "+=", operand: yyDollar[4].aexpr}
+		}
+	case 82:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:633
+		{
+			logDebugGrammar("ICOMMAND - minus assign")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "-=", operand: yyDollar[4].aexpr}
+		}
+	case 83:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:639
+		{
+			logDebugGrammar("ICOMMAND - mult assign")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "*=", operand: yyDollar[4].aexpr}
+		}
+	case 84:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:645
+		{
+			logDebugGrammar("ICOMMAND - div assign")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "/=", operand: yyDollar[4].aexpr}
+		}
+	case 85:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:651
+		{
+			logDebugGrammar("ICOMMAND - eq")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "==", operand: yyDollar[4].aexpr}
+		}
+	case 86:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:657
+		{
+			logDebugGrammar("ICOMMAND - neq")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "!=", operand: yyDollar[4].aexpr}
+		}
+	case 87:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:663
+		{
+			logDebugGrammar("ICOMMAND - greater than")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: ">", operand: yyDollar[4].aexpr}
+		}
+	case 88:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:669
+		{
+			logDebugGrammar("ICOMMAND - less than")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "<", operand: yyDollar[4].aexpr}
+		}
+	case 89:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:675
+		{
+			logDebugGrammar("ICOMMAND - greater than or eq")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: ">=", operand: yyDollar[4].aexpr}
+		}
+	case 90:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line snowball.y:681
+		{
+			logDebugGrammar("ICOMMAND - less than or eq")
+			yyVAL.ic = &iCommand{name: &name{val: yyDollar[2].s}, operator: "<=", operand: yyDollar[4].aexpr}
+		}
+	case 91:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:688
+		{
+			logDebugGrammar("AE - plus")
+			yyVAL.aexpr = &binaryAe{left: yyDollar[1].aexpr, operator: "+", right: yyDollar[3].aexpr}
+		}
+	case 92:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:694
+		{
+			logDebugGrammar("AE - minus")
+			yyVAL.aexpr = &binaryAe{left: yyDollar[1].aexpr, operator: "-", right: yyDollar[3].aexpr}
+		}
+	case 93:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:700
+		{
+			logDebugGrammar("TERM - mult")
+			yyVAL.aexpr = &binaryAe{left: yyDollar[1].aexpr, operator: "*", right: yyDollar[3].aexpr}
+		}
+	case 94:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line snowball.y:706
+		{
+			logDebugGrammar("TERM - div")
+			yyVAL.aexpr = &binaryAe{left: yyDollar[1].aexpr, operator: "/", right: yyDollar[3].aexpr}
+		}
+	case 95:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line snowball.y:712
+		{
+			logDebugGrammar("AE - unary minus")
+			yyVAL.aexpr = &unaryAe{operator: "uminus", operand: yyDollar[2].aexpr}
+		}
+	case 96:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line snowball.y:718
+		{
 			logDebugGrammar("AE - maxint")
+			yyVAL.aexpr = &nilaryAe{operator: "maxint"}
 		}
 	case 97:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:594
+		//line snowball.y:724
 		{
 			logDebugGrammar("AE - minint")
+			yyVAL.aexpr = &nilaryAe{operator: "minint"}
 		}
 	case 98:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:599
+		//line snowball.y:730
 		{
 			logDebugGrammar("AE - cursor")
+			yyVAL.aexpr = &nilaryAe{operator: "cursor"}
 		}
 	case 99:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:604
+		//line snowball.y:736
 		{
 			logDebugGrammar("AE - limit")
+			yyVAL.aexpr = &nilaryAe{operator: "limit"}
 		}
 	case 100:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:609
+		//line snowball.y:742
 		{
 			logDebugGrammar("AE - size")
+			yyVAL.aexpr = &nilaryAe{operator: "size"}
 		}
 	case 101:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:614
+		//line snowball.y:748
 		{
 			logDebugGrammar("AE - sizeof name")
+			yyVAL.aexpr = &unaryAe{operator: "sizeof", operand: &name{val: yyDollar[2].s}}
 		}
 	case 102:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:619
+		//line snowball.y:754
 		{
 			logDebugGrammar("AE - len")
+			yyVAL.aexpr = &nilaryAe{operator: "len"}
 		}
 	case 103:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:624
+		//line snowball.y:760
 		{
 			logDebugGrammar("AE - leno name")
+			yyVAL.aexpr = &unaryAe{operator: "lenof", operand: &name{val: yyDollar[2].s}}
 		}
 	case 104:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:631
+		//line snowball.y:766
 		{
-			logDebugGrammar("TERM - factor")
+			logDebugGrammar("FACTOR - name")
+			yyVAL.aexpr = &name{val: yyDollar[1].s}
 		}
 	case 105:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:636
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line snowball.y:772
 		{
-			logDebugGrammar("TERM - mult")
+			logDebugGrammar("FACTOR - number")
+			yyVAL.aexpr = &nliteral{val: yyDollar[1].n}
 		}
 	case 106:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:641
+		//line snowball.y:778
 		{
-			logDebugGrammar("TERM - div")
+			logDebugGrammar("FACTOR - parens")
+			yyVAL.aexpr = yyDollar[2].aexpr
 		}
 	case 107:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:647
-		{
-			logDebugGrammar("FACTOR - name")
-		}
-	case 108:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:652
-		{
-			logDebugGrammar("FACTOR - number")
-		}
-	case 109:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		//line snowball.y:657
-		{
-			logDebugGrammar("FACTOR - parens")
-		}
-	case 110:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line snowball.y:663
+		//line snowball.y:786
 		{
 			logDebugGrammar("NAMES - single")
 			yyVAL.strings = []string{yyDollar[1].s}
 		}
-	case 111:
+	case 108:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line snowball.y:669
+		//line snowball.y:792
 		{
 			logDebugGrammar("NAMEs - multi")
 			yyVAL.strings = append(yyDollar[2].strings, "")

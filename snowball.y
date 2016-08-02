@@ -18,6 +18,18 @@ s string
 n int
 strings []string
 declarations decls
+gitems groupitems
+g *grouping
+no node
+b *bliteral
+r *routine
+q *question
+a *amongitem
+ai amongitems
+aexpr ae
+ic *iCommand
+sc *sCommand
+p *prog
 }
 
 %token tLITERAL tNUMBER tNAME tSTRINGS tINTEGERS tBOOLEANS tROUTINES
@@ -30,7 +42,7 @@ tREPLACE tDELETE tHOP tNEXT tASSIGNR tLBRACKET tRBRACKET
 tMOVER tSETMARK tTOMARK tATMARK tTOLIMIT tATLIMIT tSETLIMIT
 tFOR tBACKWARDS tREVERSE tSUBSTRING tAMONG tSET tUNSET
 tNON tTRUE tFALSE tBACKWARDMODE tQUESTION
-tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
+tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL tUMINUS
 
 %type <s>                tLITERAL
 %type <n>                tNUMBER
@@ -38,10 +50,29 @@ tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL
 %type <s>                tSTRINGESCAPES
 %type <strings>          names
 %type <declarations>     declaration
+%type <gitems>           gplusminuslist
+%type <no>               nameorliteral
+%type <g>                gdef
+%type <b>                tTRUE
+%type <b>                tFALSE
+%type <no>               command
+%type <r>                rdef
+%type <q>                tQUESTION
+%type <a>                amongitem
+%type <ai>               amonglist
+%type <no>               commands
+%type <aexpr>            ae
+%type <ic>               icommand
+%type <sc>               scommand
+%type <p>                p
+%type <p>                program
 
 %left tNOT tTEST tTRY tDO tFAIL tGOTO tGOPAST tREPEAT tBACKWARDS tREVERSE tLOOP
 tATLEAST tNAME tFOR
 %left tOR tAND
+%left tPLUS tMINUS
+%left tMULT tDIV
+%right tUMINUS
 
 %%
 
@@ -49,41 +80,55 @@ input:
 program
 {
         logDebugGrammar("INPUT - %v", yylex.(*lexerWrapper).p)
+        yylex.(*lexerWrapper).p = $1
 };
 
 program:
 p
 {
         logDebugGrammar("PROGRAM - single")
+        $$ = $1
 }
 |
 p program
 {
         logDebugGrammar("PROGRAM - multi")
+        $2.Combine($1)
+        $$ = $2
 };
 
 p:
 declaration
 {
+        p := &prog{}
         logDebugGrammar("P - decl")
         for _, decl := range $1 {
-          yylex.(*lexerWrapper).p.Declare(decl)
+          p.Declare(decl)
         }
+        $$ = p
 }
 |
 rdef
 {
+        p := &prog{}
         logDebugGrammar("P - rdef")
+        p.DefineRoutine($1)
+        $$ = p
 }
 |
 gdef
 {
+        p := &prog{}
         logDebugGrammar("P - gdef")
+        p.DefineGroup($1)
+        $$ = p
 }
 |
 tBACKWARDMODE tLPAREN program tRPAREN
 {
         logDebugGrammar("P - backwardmode")
+        $3.SetBackwardMode()
+        $$ = $3
 }
 |
 tSTRINGESCAPES
@@ -96,11 +141,13 @@ tSTRINGESCAPES
         } else {
           logDebugGrammar("P - stringescapes rune count NOT 2!!!")
         }
+        $$ = &prog{}
 }
 |
 tSTRINGDEF stringdefliteraltype tLITERAL
 {
         logDebugGrammar("P - stringedef")
+        $$ = &prog{}
 };
 
 stringdefliteraltype:
@@ -192,45 +239,53 @@ rdef:
 tDEFINE tNAME tAS command
 {
         logDebugGrammar("RDEF")
+        $$ = &routine{name:$2, comm:$4}
 };
 
 nameorliteral:
 tNAME
 {
         logDebugGrammar("NAMEORLITERAL - name")
+        $$ = &name{val:$1}
 }
 |
 tLITERAL
 {
         logDebugGrammar("NAMEORLITERAL - literal")
-};
-
-plusorminus:
-tPLUS
-{
-        logDebugGrammar("PLUSORMINUS - plus")
-}
-|
-tMINUS
-{
-        logDebugGrammar("PLUSORMINUS - minus")
+        $$ = &sliteral{val:$1}
 };
 
 gplusminuslist:
 nameorliteral
 {
         logDebugGrammar("GPLUSMINUSLIST - single")
+        $$ = groupitems{&groupitem{item: $1}}
 }
 |
-nameorliteral plusorminus gplusminuslist
+nameorliteral tPLUS gplusminuslist
 {
         logDebugGrammar("GPLUSMINUSLIST - multi")
+        //$$ = append($3, &groupitem{item: $1})
+        $$ = append($3, nil)
+        copy($$[1:], $$[0:])
+        $$[0] = &groupitem{item: $1}
+}
+|
+nameorliteral tMINUS gplusminuslist
+{
+        logDebugGrammar("GPLUSMINUSLIST - MINUS multi")
+        //$$ = append($3, &groupitem{item: $1, minus:true})
+        $$ = append($3, nil)
+        copy($$[1:], $$[0:])
+        $$[0] = &groupitem{item: $1}
+        $$[1].minus = true
 };
 
 gdef:
 tDEFINE tNAME gplusminuslist
 {
-        logDebugGrammar("GDEF")
+        $$ = &grouping{name: $2, children: $3}
+        logDebugGrammar("GDEF - %v", $$)
 };
 
 commands:
@@ -248,36 +303,43 @@ command:
 nameorliteral
 {
         logDebugGrammar("COMMANDFACTOR - s")
+        $$ = $1
 }
 |
 icommand
 {
         logDebugGrammar("COMMAND - icommand")
+        $$ = $1
 }
 |
 scommand
 {
         logDebugGrammar("COMMAND - scommand")
+        $$ = $1
 }
 |
 tAMONG tLPAREN tRPAREN
 {
         logDebugGrammar("COMMAND - among empty")
+        $$ = &among{}
 }
 |
 tAMONG tLPAREN amonglist tRPAREN
 {
         logDebugGrammar("COMMAND - among list")
+        $$ = &among{children:$3}
 }
 |
 tTRUE
 {
         logDebugGrammar("COMMANDFACTOR - true")
+        $$ = &bliteral{val: true}
 }
 |
 tFALSE
 {
         logDebugGrammar("COMMANDFACTOR - false")
+        $$ = &bliteral{val: false}
 }
 |
 tLPAREN tRPAREN
@@ -288,186 +350,223 @@ tLPAREN tRPAREN
 tLPAREN commands tRPAREN
 {
         logDebugGrammar("COMMANDFACTOR - paren commands")
+        $$ = $2
 }
 |
 tNOT command
 {
-        logDebugGrammar("COMMAND - unary not")
+        logDebugGrammar("COMMAND - not")
+        $$ = &unaryCommand{command:"not", operandCommand: $2}
 }
 |
 tTEST command
 {
-        logDebugGrammar("COMMAND - unary test")
+        logDebugGrammar("COMMAND - test")
+        $$ = &unaryCommand{command:"test", operandCommand: $2}
 }
 |
 tTRY command
 {
-        logDebugGrammar("COMMAND - unary try")
+        logDebugGrammar("COMMAND - try")
+        $$ = &unaryCommand{command:"try", operandCommand: $2}
 }
 |
 tDO command
 {
-        logDebugGrammar("COMMAND - unary do")
+        logDebugGrammar("COMMAND - do")
+        $$ = &unaryCommand{command:"do", operandCommand: $2}
 }
 |
 tFAIL command
 {
         logDebugGrammar("COMMAND - unary fail")
+        $$ = &unaryCommand{command:"fail", operandCommand: $2}
 }
 |
 tGOTO command
 {
-        logDebugGrammar("COMMAND - unary goto")
+        logDebugGrammar("COMMAND - goto")
+        $$ = &unaryCommand{command:"goto", operandCommand: $2}
 }
 |
 tGOPAST command
 {
         logDebugGrammar("COMMAND - unary gopast")
+        $$ = &unaryCommand{command:"gopast", operandCommand: $2}
 }
 |
 tREPEAT command
 {
         logDebugGrammar("COMMAND - unary repeat")
+        $$ = &unaryCommand{command:"repeat", operandCommand: $2}
 }
 |
 tLOOP ae command
 {
         logDebugGrammar("COMMAND - loop ae")
+        $$ = &loop{n: $2, operand: $3}
 }
 |
 tATLEAST ae command
 {
         logDebugGrammar("COMMAND - loop ae")
+        $$ = &loop{n: $2, operand: $3, extra:true}
 }
 |
 tINSERT nameorliteral
 {
         logDebugGrammar("COMMAND - insert")
+        $$ = &unaryCommand{command:"insert", operandCommand: $2}
 }
 |
 tATTACH nameorliteral
 {
         logDebugGrammar("COMMAND - attach")
+        $$ = &unaryCommand{command:"attach", operandCommand: $2}
 }
 |
 tREPLACE nameorliteral
 {
         logDebugGrammar("COMMAND - replace")
+        $$ = &unaryCommand{command:"replace", operandCommand: $2}
 }
 |
 tDELETE
 {
         logDebugGrammar("COMMAND - delete")
+        $$ = &nilaryCommand{operator:"delete"}
 }
 |
 tHOP ae
 {
         logDebugGrammar("COMMAND - hop")
+        $$ = &unaryCommand{command:"hop", operandCommand: $2}
 }
 |
 tNEXT
 {
         logDebugGrammar("COMMAND - next")
+        $$ = &nilaryCommand{operator:"next"}
 }
 |
-tASSIGNR
+tASSIGNR tNAME
 {
         logDebugGrammar("COMMAND - assign right")
+        $$ = &unaryCommand{command:"assignr", operandName: &name{val:$2}}
 }
 |
 tLBRACKET
 {
         logDebugGrammar("COMMAND - lbracket")
+        $$ = &nilaryCommand{operator:"["}
 }
 |
 tRBRACKET
 {
         logDebugGrammar("COMMAND - rbracket")
+        $$ = &nilaryCommand{operator:"]"}
 }
 |
 tMOVER tNAME
 {
         logDebugGrammar("COMMAND - move right")
+        $$ = &unaryCommand{command:"mover", operandName: &name{val:$2}}
 }
 |
 tSETMARK tNAME
 {
         logDebugGrammar("COMMAND - setmark")
+        $$ = &unaryCommand{command:"setmark", operandName: &name{val:$2}}
 }
 |
 tTOMARK ae
 {
         logDebugGrammar("COMMAND - tomark")
+        $$ = &unaryCommand{command:"tomark", operandAe: $2}
 }
 |
 tATMARK ae
 {
         logDebugGrammar("COMMAND - atmark")
+        $$ = &unaryCommand{command:"atmark", operandAe: $2}
 }
 |
 tTOLIMIT
 {
         logDebugGrammar("COMMAND - tolimit")
+        $$ = &nilaryCommand{operator:"tolimit"}
 }
 |
 tATLIMIT
 {
         logDebugGrammar("COMMAND - atlimit")
+        $$ = &nilaryCommand{operator:"atlimit"}
 }
 |
 tSETLIMIT command tFOR command
 {
         logDebugGrammar("COMMAND - setlimit")
+        $$ = &binaryCommand{left:$2, operator:"setlimitfor", right:$4}
 }
 |
 tBACKWARDS command
 {
         logDebugGrammar("COMMAND - backwards")
+        $$ = &unaryCommand{command:"backwards", operandCommand: $2}
 }
 |
 tREVERSE command
 {
         logDebugGrammar("COMMAND - reverse")
+        $$ = &unaryCommand{command:"reverse", operandCommand: $2}
 }
 |
 tSUBSTRING
 {
         logDebugGrammar("COMMAND - substring")
+        $$ = &nilaryCommand{operator:"substring"}
 }
 |
 tSET tNAME
 {
         logDebugGrammar("COMMAND - set")
+        $$ = &set{bname:$2}
 }
 |
 tUNSET tNAME
 {
         logDebugGrammar("COMMAND - unset")
+        $$ = &unset{bname:$2}
 }
 |
 tNON tNAME
 {
         logDebugGrammar("COMMAND - non")
+        $$ = &non{gname:$2}
 }
 |
 tNON tMINUS tNAME
 {
         logDebugGrammar("COMMAND - non minus")
+        $$ = &non{gname:$3, minus:true}
 }
 |
 tQUESTION
 {
         logDebugGrammar("COMMAND - question")
+        $$ = &question{}
 }
 |
 command tOR command
 {
         logDebugGrammar("COMMANDTERM - or")
+        $$ = &binaryCommand{left:$1, operator:"or", right:$3}
 }
 |
 command tAND command
 {
         logDebugGrammar("COMMANDTERM - and")
+        $$ = &binaryCommand{left:$1, operator:"and", right:$3}
 }
 ;
 
@@ -475,188 +574,212 @@ amonglist:
 amongitem
 {
         logDebugGrammar("AMONGLIST - single")
+        $$ = amongitems{$1}
 }
 |
 amongitem amonglist {
         logDebugGrammar("AMONGLIST - multi")
+        $$ = append($2, nil)
+        copy($$[1:], $$[0:])
+        $$[0] = $1
 };
 
 amongitem:
 tLITERAL
 {
         logDebugGrammar("AMONGITEM - literal")
+        $$ = &amongitem{slit:&sliteral{val:$1}}
 }
 |
 tLITERAL tNAME
 {
         logDebugGrammar("AMONGITEM - literal name")
+        $$ = &amongitem{slit:&sliteral{val:$1}, rname:$2}
 }
 |
-tLITERAL tLPAREN tRPAREN
+tLPAREN tRPAREN
 {
         logDebugGrammar("AMONGITEM - paren empty")
+        $$ = &amongitem{}
 }
 |
-tLITERAL tLPAREN commands tRPAREN
+tLPAREN commands tRPAREN
 {
         logDebugGrammar("AMONGITEM - paren command")
+        $$ = &amongitem{comm:$2}
 };
 
 scommand:
 tDOLLAR tNAME command
 {
         logDebugGrammar("SCOMMAND")
+        $$ = &sCommand{name:&name{val:$2}, operand:$3}
 };
 
 icommand:
 tDOLLAR tNAME tASSIGN ae
 {
         logDebugGrammar("ICOMMAND - assign")
+        $$ = &iCommand{name:&name{val:$2}, operator:"=", operand:$4}
 }
 |
 tDOLLAR tNAME tPLUSASSIGN ae
 {
         logDebugGrammar("ICOMMAND - plus assign")
+        $$ = &iCommand{name:&name{val:$2}, operator:"+=", operand:$4}
 }
 |
 tDOLLAR tNAME tMINUSASSIGN ae
 {
         logDebugGrammar("ICOMMAND - minus assign")
+        $$ = &iCommand{name:&name{val:$2}, operator:"-=", operand:$4}
 }
 |
 tDOLLAR tNAME tMULTASSIGN ae
 {
         logDebugGrammar("ICOMMAND - mult assign")
+        $$ = &iCommand{name:&name{val:$2}, operator:"*=", operand:$4}
 }
 |
 tDOLLAR tNAME tDIVASSIGN ae
 {
         logDebugGrammar("ICOMMAND - div assign")
+        $$ = &iCommand{name:&name{val:$2}, operator:"/=", operand:$4}
 }
 |
 tDOLLAR tNAME tEQ ae
 {
         logDebugGrammar("ICOMMAND - eq")
+        $$ = &iCommand{name:&name{val:$2}, operator:"==", operand:$4}
 }
 |
 tDOLLAR tNAME tNEQ ae
 {
         logDebugGrammar("ICOMMAND - neq")
+        $$ = &iCommand{name:&name{val:$2}, operator:"!=", operand:$4}
 }
 |
 tDOLLAR tNAME tGT ae
 {
         logDebugGrammar("ICOMMAND - greater than")
+        $$ = &iCommand{name:&name{val:$2}, operator:">", operand:$4}
 }
 |
 tDOLLAR tNAME tLT ae
 {
         logDebugGrammar("ICOMMAND - less than")
+        $$ = &iCommand{name:&name{val:$2}, operator:"<", operand:$4}
 }
 |
 tDOLLAR tNAME tGTEQ ae
 {
         logDebugGrammar("ICOMMAND - greater than or eq")
+        $$ = &iCommand{name:&name{val:$2}, operator:">=", operand:$4}
 }
 |
 tDOLLAR tNAME tLTEQ ae
 {
         logDebugGrammar("ICOMMAND - less than or eq")
+        $$ = &iCommand{name:&name{val:$2}, operator:"<=", operand:$4}
 };
 
 ae:
-term tPLUS ae
+ae tPLUS ae
 {
         logDebugGrammar("AE - plus")
+        $$ = &binaryAe{left:$1, operator:"+",right:$3}
 }
 |
-term tMINUS ae
+ae tMINUS ae
 {
         logDebugGrammar("AE - minus")
+        $$ = &binaryAe{left:$1, operator:"-",right:$3}
 }
 |
-term
+ae tMULT ae
 {
-        logDebugGrammar("AE - term")
+        logDebugGrammar("TERM - mult")
+        $$ = &binaryAe{left:$1, operator:"*",right:$3}
 }
 |
-tMINUS ae
+ae tDIV ae
+{
+        logDebugGrammar("TERM - div")
+        $$ = &binaryAe{left:$1, operator:"/",right:$3}
+}
+|
+tMINUS ae %prec tUMINUS
 {
         logDebugGrammar("AE - unary minus")
+        $$ = &unaryAe{operator:"uminus", operand: $2}
 }
 |
 tMAXINT
 {
         logDebugGrammar("AE - maxint")
+        $$ = &nilaryAe{operator:"maxint"}
 }
 |
 tMININT
 {
         logDebugGrammar("AE - minint")
+        $$ = &nilaryAe{operator:"minint"}
 }
 |
 tCURSOR
 {
         logDebugGrammar("AE - cursor")
+        $$ = &nilaryAe{operator:"cursor"}
 }
 |
 tLIMIT
 {
         logDebugGrammar("AE - limit")
+        $$ = &nilaryAe{operator:"limit"}
 }
 |
 tSIZE
 {
         logDebugGrammar("AE - size")
+        $$ = &nilaryAe{operator:"size"}
 }
 |
 tSIZEOF tNAME
 {
         logDebugGrammar("AE - sizeof name")
+        $$ = &unaryAe{operator:"sizeof", operand: &name{val:$2}}
 }
 |
 tLEN
 {
         logDebugGrammar("AE - len")
+        $$ = &nilaryAe{operator:"len"}
 }
 |
 tLENOF tNAME
 {
         logDebugGrammar("AE - leno name")
-}
-;
-
-term:
-factor
-{
-        logDebugGrammar("TERM - factor")
+        $$ = &unaryAe{operator:"lenof", operand: &name{val:$2}}
 }
 |
-factor tMULT term
-{
-        logDebugGrammar("TERM - mult")
-}
-|
-factor tDIV term
-{
-        logDebugGrammar("TERM - div")
-};
-
-factor:
 tNAME
 {
         logDebugGrammar("FACTOR - name")
+        $$ = &name{val:$1}
 }
 |
 tNUMBER
 {
         logDebugGrammar("FACTOR - number")
+        $$ = &nliteral{val:$1}
 }
 |
 tLPAREN ae tRPAREN
 {
         logDebugGrammar("FACTOR - parens")
-};
+        $$ = $2
+}
+;
 
 names:
 tNAME

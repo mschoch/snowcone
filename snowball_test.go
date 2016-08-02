@@ -90,10 +90,10 @@ func TestParser(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
+	for i, test := range tests {
 		_, err := Parse(strings.NewReader(test.in))
 		if err != nil {
-			t.Errorf("parse error: %v", err)
+			t.Errorf("parse error on test %d: %v", i, err)
 		}
 	}
 }

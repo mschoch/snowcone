@@ -19,3 +19,6 @@ Snowcone is a [snowball](http://snowballstem.org/) compiler for Go.  Currently, 
     - review grammar - rule expanding `C` to  `= S`, I encountered a reduce/reduce conflict that i haven't yet resolved
 - Build AST
 - Generate Go code
+
+# Open Questions
+- What does `?` command do?  Manual only includes it in the grammar and says it's a debugging aid.
