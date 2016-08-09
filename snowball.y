@@ -23,13 +23,13 @@ g *grouping
 no node
 b *bliteral
 r *routine
-q *question
 a *amongitem
 ai amongitems
 aexpr ae
 ic *iCommand
 sc *sCommand
 p *prog
+cl commands
 }
 
 %token tLITERAL tNUMBER tNAME tSTRINGS tINTEGERS tBOOLEANS tROUTINES
@@ -57,19 +57,21 @@ tSTRINGESCAPES tSTRINGDEF tHEX tDECIMAL tUMINUS
 %type <b>                tFALSE
 %type <no>               command
 %type <r>                rdef
-%type <q>                tQUESTION
+%type <no>                tQUESTION
 %type <a>                amongitem
 %type <ai>               amonglist
-%type <no>               commands
+%type <cl>               commands
 %type <aexpr>            ae
 %type <ic>               icommand
 %type <sc>               scommand
 %type <p>                p
 %type <p>                program
+%type <s>                tSTRINGDEF
 
+
+%left tOR tAND
 %left tNOT tTEST tTRY tDO tFAIL tGOTO tGOPAST tREPEAT tBACKWARDS tREVERSE tLOOP
 tATLEAST tNAME tFOR
-%left tOR tAND
 %left tPLUS tMINUS
 %left tMULT tDIV
 %right tUMINUS
@@ -93,8 +95,8 @@ p
 p program
 {
         logDebugGrammar("PROGRAM - multi")
-        $2.Combine($1)
-        $$ = $2
+        $1.Combine($2)
+        $$ = $1
 };
 
 p:
@@ -138,6 +140,7 @@ tSTRINGESCAPES
           first, len := utf8.DecodeRuneInString($1)
           second, len := utf8.DecodeRuneInString($1[len:])
           yylex.(*lexerWrapper).lex.(*snowConeLex).SetStringEscapes(first, second)
+          yylex.(*lexerWrapper).sd.SetStringEscapes(first, second)
         } else {
           logDebugGrammar("P - stringescapes rune count NOT 2!!!")
         }
@@ -147,6 +150,8 @@ tSTRINGESCAPES
 tSTRINGDEF stringdefliteraltype tLITERAL
 {
         logDebugGrammar("P - stringedef")
+        replacedLiteral := yylex.(*lexerWrapper).sd.ReplaceInLiteral($3)
+        yylex.(*lexerWrapper).sd.Define($1, replacedLiteral)
         $$ = &prog{}
 };
 
@@ -252,7 +257,8 @@ tNAME
 tLITERAL
 {
         logDebugGrammar("NAMEORLITERAL - literal")
-        $$ = &sliteral{val:$1}
+        replacedLiteral := yylex.(*lexerWrapper).sd.ReplaceInLiteral($1)
+        $$ = &sliteral{val:replacedLiteral}
 };
 
 gplusminuslist:
@@ -292,11 +298,15 @@ commands:
 command
 {
         logDebugGrammar("COMMANDS - single")
+        $$ = commands{$1}
 }
 |
 command commands
 {
         logDebugGrammar("COMMANDS - multi")
+        $$ = append($2, nil)
+        copy($$[1:], $$[0:])
+        $$[0] = $1
 };
 
 command:
@@ -530,13 +540,13 @@ tSUBSTRING
 tSET tNAME
 {
         logDebugGrammar("COMMAND - set")
-        $$ = &set{bname:$2}
+        $$ = &unaryCommand{command:"set", operandName:&name{val:$2}}
 }
 |
 tUNSET tNAME
 {
         logDebugGrammar("COMMAND - unset")
-        $$ = &unset{bname:$2}
+        $$ = &unaryCommand{command:"unset", operandName:&name{val:$2}}
 }
 |
 tNON tNAME
@@ -554,7 +564,7 @@ tNON tMINUS tNAME
 tQUESTION
 {
         logDebugGrammar("COMMAND - question")
-        $$ = &question{}
+        $$ = &nilaryCommand{operator:"?"}
 }
 |
 command tOR command
@@ -588,13 +598,15 @@ amongitem:
 tLITERAL
 {
         logDebugGrammar("AMONGITEM - literal")
-        $$ = &amongitem{slit:&sliteral{val:$1}}
+        replacedLiteral := yylex.(*lexerWrapper).sd.ReplaceInLiteral($1)
+        $$ = &amongitem{slit:&sliteral{val:replacedLiteral}}
 }
 |
 tLITERAL tNAME
 {
         logDebugGrammar("AMONGITEM - literal name")
-        $$ = &amongitem{slit:&sliteral{val:$1}, rname:$2}
+        replacedLiteral := yylex.(*lexerWrapper).sd.ReplaceInLiteral($1)
+        $$ = &amongitem{slit:&sliteral{val:replacedLiteral}, rname:$2}
 }
 |
 tLPAREN tRPAREN

@@ -10,6 +10,7 @@ import (
 
 var debugLexer = flag.Bool("debugLexer", false, "debug lexer")
 var debugParser = flag.Bool("debugParser", false, "debug parser")
+var printAST = flag.Bool("printAST", false, "print the AST")
 
 func main() {
 	flag.Parse()
@@ -33,9 +34,13 @@ func main() {
 		log.Fatalf("error opening snowball source file %s: %v", flag.Arg(0), err)
 	}
 
-	_, err = snowcone.Parse(f)
+	p, err := snowcone.Parse(f)
 	if err != nil {
 		log.Fatalf("parse error: %v", err)
+	}
+
+	if *printAST {
+		snowcone.PrintTreeView(p)
 	}
 
 }

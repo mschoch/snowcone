@@ -57,7 +57,7 @@ func TestParsingAST(t *testing.T) {
 		// the simplest program i felt i could manually construct the ast for
 		{
 			in: `routines (r1)
-	define r1 as loop 1+1 true`,
+		define r1 as loop 1+1 true`,
 			p: &prog{
 				decls: decls{
 					&decl{
@@ -89,7 +89,7 @@ func TestParsingAST(t *testing.T) {
 		// test order of operations in arithmetic
 		{
 			in: `routines (r1)
-	define r1 as loop 1+3*2 true`,
+		define r1 as loop 1+3*2 true`,
 			p: &prog{
 				decls: decls{
 					&decl{
@@ -127,7 +127,7 @@ func TestParsingAST(t *testing.T) {
 		// test order of operations in arithmetic, override with parens
 		{
 			in: `routines (r1)
-	define r1 as loop (1+3)*2 true`,
+		define r1 as loop (1+3)*2 true`,
 			p: &prog{
 				decls: decls{
 					&decl{
@@ -162,15 +162,177 @@ func TestParsingAST(t *testing.T) {
 				},
 			},
 		},
+		// precedence test from manual, unary binds to shortest valid command
+		{
+			in: `integers( x z )
+		routines (r1)
+		define r1 as (try not $x < 1 $z > 0)`,
+			p: &prog{
+				decls: decls{
+					&decl{
+						name: "x",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "z",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "r1",
+						typ:  sroutine,
+					},
+				},
+				routinedefs: []*routine{
+					&routine{
+						name: "r1",
+						comm: commands{
+							&unaryCommand{
+								command: "try",
+								operandCommand: &unaryCommand{
+									command: "not",
+									operandCommand: &iCommand{
+										name:     &name{val: "x"},
+										operator: "<",
+										operand:  &nliteral{val: 1}},
+								},
+							},
+							&iCommand{
+								name:     &name{val: "z"},
+								operator: ">",
+								operand:  &nliteral{val: 0}},
+						},
+					},
+				},
+			},
+		},
+		// another test from manual, binary commands bind after unary
+		// then equally from left to right afterwards
+		{
+			in: `integers( x y z t )
+					routines (r1)
+					define r1 as ($x > 0  not $y > 0 or not $z > 0  $t > 0)`,
+			p: &prog{
+				decls: decls{
+					&decl{
+						name: "x",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "y",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "z",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "t",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "r1",
+						typ:  sroutine,
+					},
+				},
+				routinedefs: []*routine{
+					&routine{
+						name: "r1",
+						comm: commands{
+							&iCommand{
+								name:     &name{val: "x"},
+								operator: ">",
+								operand:  &nliteral{val: 0},
+							},
+							&binaryCommand{
+								left: &unaryCommand{
+									command: "not",
+									operandCommand: &iCommand{
+										name:     &name{val: "y"},
+										operator: ">",
+										operand:  &nliteral{val: 0}},
+								},
+								operator: "or",
+								right: &unaryCommand{
+									command: "not",
+									operandCommand: &iCommand{
+										name:     &name{val: "z"},
+										operator: ">",
+										operand:  &nliteral{val: 0}},
+								},
+							},
+							&iCommand{
+								name:     &name{val: "t"},
+								operator: ">",
+								operand:  &nliteral{val: 0},
+							},
+						},
+					},
+				},
+			},
+		},
+		// yet another precedence test from manual, or binds before and in this case
+		{
+			in: `integers( x y z )
+					routines (r1)
+					define r1 as ($x > 0  or $y > 0 and $z > 0)`,
+			p: &prog{
+				decls: decls{
+					&decl{
+						name: "x",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "y",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "z",
+						typ:  sinteger,
+					},
+					&decl{
+						name: "r1",
+						typ:  sroutine,
+					},
+				},
+				routinedefs: []*routine{
+					&routine{
+						name: "r1",
+						comm: commands{
+							&binaryCommand{
+								left: &binaryCommand{
+									left: &iCommand{
+										name:     &name{val: "x"},
+										operator: ">",
+										operand:  &nliteral{val: 0},
+									},
+									operator: "or",
+									right: &iCommand{
+										name:     &name{val: "y"},
+										operator: ">",
+										operand:  &nliteral{val: 0},
+									},
+								},
+								operator: "and",
+								right: &iCommand{
+									name:     &name{val: "z"},
+									operator: ">",
+									operand:  &nliteral{val: 0},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
 		p, err := Parse(strings.NewReader(test.in))
 		if err != nil {
-			t.Errorf("parse error: %v", err)
+			t.Fatalf("parse error: %v", err)
 		}
 		if !reflect.DeepEqual(p, test.p) {
-			t.Errorf("expected %v,\n got %v", test.p, p)
+			t.Errorf("programs differ, got\n%s\nexpected\n%s", PrintTreeViewString(p), PrintTreeViewString(test.p))
 		}
 	}
 }

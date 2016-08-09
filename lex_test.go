@@ -671,6 +671,16 @@ func TestLexer(t *testing.T) {
 			outTokens:     nil,
 		},
 		{
+			// test stringdef
+			in:            "stringdef a'",
+			outTokenTypes: []int{tSTRINGDEF},
+			outTokens: []yySymType{
+				{
+					s: "a'",
+				},
+			},
+		},
+		{
 			in: `
 			/* a multi
 			line comment */
@@ -699,6 +709,26 @@ func TestLexer(t *testing.T) {
 			in:            "'alit",
 			outTokenTypes: nil,
 			outTokens:     nil,
+		},
+		// more complex case that fails at parsing, wanted to validate lexing
+		// it's actually not valid grammar (needs parens around command list)
+		// but is still valid to lex the tokens
+		{
+			in: `integers( x z )
+	routines (r1)
+	define r1 as try not $x < 1 $z > 0`,
+			outTokenTypes: []int{
+				tINTEGERS, tLPAREN, tNAME, tNAME, tRPAREN,
+				tROUTINES, tLPAREN, tNAME, tRPAREN,
+				tDEFINE, tNAME, tAS,
+				tTRY, tNOT, tDOLLAR, tNAME, tLT, tNUMBER, tDOLLAR, tNAME, tGT, tNUMBER,
+			},
+			outTokens: []yySymType{
+				{}, {}, {s: "x"}, {s: "z"}, {},
+				{}, {}, {s: "r1"}, {},
+				{}, {s: "r1"}, {},
+				{}, {}, {}, {s: "x"}, {}, {n: 1}, {}, {s: "z"}, {}, {n: 0},
+			},
 		},
 	}
 

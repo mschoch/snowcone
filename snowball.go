@@ -66,6 +66,7 @@ type lexerWrapper struct {
 	lex  yyLexer
 	errs []string
 	p    *prog
+	sd   *stringdefs
 }
 
 func newLexerWrapper(lex yyLexer) *lexerWrapper {
@@ -73,6 +74,7 @@ func newLexerWrapper(lex yyLexer) *lexerWrapper {
 		lex:  lex,
 		errs: []string{},
 		p:    &prog{},
+		sd:   &stringdefs{},
 	}
 }
 

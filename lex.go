@@ -176,10 +176,8 @@ func maybeNameKeywordState(l *snowConeLex, next rune, eof bool) (lexState, bool)
 
 	// still might be a keyword, needs to be exact match with first possible
 	if l.possibleKeywords[0] == l.buf {
-		logDebugTokens("EOF first match")
 		return finishKeyword(l)
 	}
-	logDebugTokens("EOF first NOT match")
 	return finishName(l)
 }
 
@@ -206,11 +204,37 @@ func finishStringEscapesState(l *snowConeLex, next rune, eof bool) (lexState, bo
 	return nil, true
 }
 
+// we've already found the stringdef token, looking for sequence of
+// printable characters to finish
+func finishStringDefState(l *snowConeLex, next rune, eof bool) (lexState, bool) {
+	if !eof {
+		if len(l.buf) == 0 {
+			if unicode.IsSpace(next) {
+				// haven't seen start yet, eat whitespace
+				return finishStringDefState, true
+			}
+			l.buf += string(next)
+			return finishStringDefState, true
+		}
+		l.nextTokenType = keywordTokenTypes["stringdef"]
+		l.nextToken = &yySymType{
+			s: l.buf + string(next),
+		}
+		logDebugTokens("STRINGDEF - '%s'", l.nextToken.s)
+		l.reset()
+		return startState, false
+	}
+	return nil, true
+}
+
 func finishKeyword(l *snowConeLex) (lexState, bool) {
+	// handle 2 special cases
 	if l.possibleKeywords[0] == "stringescapes" {
-		// just kidding not really done
 		l.buf = ""
 		return finishStringEscapesState, true
+	} else if l.possibleKeywords[0] == "stringdef" {
+		l.buf = ""
+		return finishStringDefState, true
 	}
 	l.nextTokenType = keywordTokenTypes[l.possibleKeywords[0]]
 	l.nextToken = &yySymType{}
