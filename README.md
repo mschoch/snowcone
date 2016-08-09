@@ -1,4 +1,4 @@
-# ![snowcone](snowcone.png) snowcone
+# ![snowcone](cone.png) snowcone
 
 Snowcone is a [snowball](http://snowballstem.org/) compiler for Go.  Currently, it is only capable of lexing and parsing the source.  It cannot yet generate the corresponding Go code.
 
