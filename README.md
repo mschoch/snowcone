@@ -1,4 +1,4 @@
-# snowcone
+# ![snowcone](snowcone.png) snowcone
 
 Snowcone is a [snowball](http://snowballstem.org/) compiler for Go.  Currently, it is only capable of lexing and parsing the source.  It cannot yet generate the corresponding Go code.
 
@@ -15,10 +15,9 @@ Snowcone is a [snowball](http://snowballstem.org/) compiler for Go.  Currently, 
 # TODO
 - Parser
     - `get` directives
-    - stringdef
     - review grammar - rule expanding `C` to  `= S`, I encountered a reduce/reduce conflict that i haven't yet resolved
-- Build AST
-- Generate Go code
+- Build interpreter to evaluate externals on user supplied input
+- Generate Go code to execute externals in external apps
 
 # Open Questions
 - What does `?` command do?  Manual only includes it in the grammar and says it's a debugging aid.
